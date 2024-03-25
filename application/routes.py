@@ -37,3 +37,6 @@ def login():
         else:
             print("Wrong password or email")
             return render_template('login.html')
+
+def register():
+    print("Registering user")
