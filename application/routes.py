@@ -1,6 +1,6 @@
-from flask import render_template, request, redirect, url_for, session
+from flask import render_template, request, redirect, url_for, session, request
 from application import app, db
-from application.models import User
+from application.models import *
 from flask_login import login_required, current_user, login_user, logout_user, LoginManager
 
 # Initialize Flask-Login
@@ -26,8 +26,9 @@ def register():
         phone = request.form['phone']
         password = request.form['password']
         address = request.form['address']
-        role = 'customer'
-        user = User(name=name, email=email, phone=phone, password=password, address=address, role=role)
+        gender = request.form.get('gender')  # Get the selected gender value
+        role = request.form.get('role')  # Get the selected role value
+        user = User(name=name, email=email, phone=phone, password=password, address=address, gender=gender, role=role)
         db.session.add(user)
         db.session.commit()
         return redirect(url_for('login'))
@@ -82,22 +83,40 @@ def user_profile():
     address = user.address
     return render_template('user_profile.html', name=name, email=email, phone=phone, address=address)
 
-# New routes for My Books, Account Settings, and Browse Sections
-
-@app.route('/my_books')
+@app.route('/user_my_books')
 @login_required
-def my_books():
-    # Add logic here to fetch user's books
-    return render_template('my_books.html')
+def user_my_books():
+    user_books = Book.query.filter_by(user_id=current_user.id).all()
+    return render_template('user_my_books.html', user_books=user_books)
 
-@app.route('/account_settings')
+@app.route('/user_account_settings')
 @login_required
-def account_settings():
+def user_account_settings():
     # Add logic here to fetch user's account settings
-    return render_template('account_settings.html')
+    return render_template('user_account_settings.html')
 
-@app.route('/browse_sections')
+@app.route('/update_account_settings', methods=['POST'])
 @login_required
-def browse_sections():
+def update_account_settings():
+    if request.method == 'POST':
+        # Get form data
+        new_address = request.form.get('new_address')
+        new_phone = request.form.get('new_phone')
+        new_password = request.form.get('new_password')
+
+        # Update user information if data is provided
+        if new_address:
+            current_user.update_address(new_address)
+        if new_phone:
+            current_user.update_phone(new_phone)
+        if new_password:
+            current_user.update_password(new_password)
+
+        # Redirect to user account settings page or wherever appropriate
+        return redirect(url_for('user_account_settings'))
+
+@app.route('/user_browse_sections')
+@login_required
+def user_browse_sections():
     # Add logic here to browse different sections of the library
-    return render_template('browse_sections.html')
+    return render_template('user_browse_sections.html')

@@ -3,13 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>My Books | Library Management System</title>
+    <title>Browse Sections | Library Management System</title>
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        /* Custom styles */
-        /* Add your custom CSS styles here */
-    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -41,23 +37,11 @@
     </nav>
 
     <div class="container mt-4">
-        <h1>My Books</h1>
-        <div class="container mt-4">
-            <h1>My Books</h1>
-            <div class="row">
-                {% for book in user_books %}
-                <div class="col-md-4">
-                    <div class="card mb-4 shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ book.title }}</h5>
-                            <p class="card-text">Author: {{ book.author }}</p>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-            <!-- Add more book cards here -->
+        <h1>Browse Sections</h1>
+        <div class="list-group mt-3">
+            {% for section in browse_sections %}
+            <a href="#" class="list-group-item list-group-item-action">{{ section.name }}</a>
+            {% endfor %}
         </div>
     </div>
 
