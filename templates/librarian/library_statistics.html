@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librarian Statistics</title>
+    <!-- Include necessary libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='library_statistics.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Statistics Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('add_book') }}">Add New Book</a></li>
+                <li><a href="{{ url_for('add_section') }}">Manage Sections</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li><a href="{{ url_for('librarian_statistics') }}">Library Statistics</a></li>
+                <!-- Add more navigation links as needed -->
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>Librarian Statistics</h1>
+        
+        <div class="chart-container">
+            <!-- Display pie chart for new books added -->
+            <canvas id="booksPieChart" width="300" height="300"></canvas>
+            
+            <!-- Display pie chart for new sections added -->
+            <canvas id="sectionsPieChart" width="300" height="300"></canvas>
+        </div>
+        
+        <div class="chart-container">
+            <!-- Display bar chart for new books added -->
+            <canvas id="booksBarChart" width="400" height="400"></canvas>
+            
+            <!-- Display bar chart for new sections added -->
+            <canvas id="sectionsBarChart" width="400" height="400"></canvas>
+        </div>
+        
+        <!-- Display statistics for new users and users logged in today -->
+        <div>
+            <h2>Statistics</h2>
+            <p>New Users: {{ new_users_count }}</p>
+            <p>Users Logged In Today: {{ users_logged_in_today }}</p>
+            <!-- Add more statistics as needed -->
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code to initialize and populate charts using Chart.js
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pie chart for new books added
+            var booksPieCtx = document.getElementById('booksPieChart').getContext('2d');
+            var booksPieChart = new Chart(booksPieCtx, {
+                type: 'pie',
+                data: {
+                    labels: {{ books_labels | tojson }},
+                    datasets: [{
+                        label: 'New Books Added',
+                        data: {{ books_data | tojson }},
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(153, 102, 255, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+
+            // Pie chart for new sections added
+            var sectionsPieCtx = document.getElementById('sectionsPieChart').getContext('2d');
+            var sectionsPieChart = new Chart(sectionsPieCtx, {
+                type: 'pie',
+                data: {
+                    labels: {{ sections_labels | tojson }},
+                    datasets: [{
+                        label: 'New Sections Added',
+                        data: {{ sections_data | tojson }},
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.5)',
+                            'rgba(54, 162, 235, 0.5)',
+                            'rgba(255, 206, 86, 0.5)',
+                            'rgba(75, 192, 192, 0.5)',
+                            'rgba(153, 102, 255, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+
+            // Bar chart for new books added
+            var booksBarCtx = document.getElementById('booksBarChart').getContext('2d');
+            var booksBarChart = new Chart(booksBarCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ books_labels | tojson }},
+                    datasets: [{
+                        label: 'New Books Added',
+                        data: {{ books_data | tojson }},
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+
+            // Bar chart for new sections added
+            var sectionsBarCtx = document.getElementById('sectionsBarChart').getContext('2d');
+            var sectionsBarChart = new Chart(sectionsBarCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ sections_labels | tojson }},
+                    datasets: [{
+                        label: 'New Sections Added',
+                        data: {{ sections_data | tojson }},
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -11,6 +11,8 @@ class User(db.Model, UserMixin):
     address = db.Column(db.String(255), nullable=True)
     gender = db.Column(db.String(10), nullable=True)
     role = db.Column(db.String(20), nullable=False, default="user")
+    date_registered = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    last_login = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, name, email, phone, password, address=None, gender=None, role='user'):
         self.name = name
@@ -52,6 +54,8 @@ class Librarian(db.Model, UserMixin):
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
+    date_registered = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    last_login = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, name, email, password):
         self.name = name
@@ -75,10 +79,10 @@ class Book(db.Model):
     author = db.Column(db.String(100), nullable=False)
     isbn = db.Column(db.String(20), nullable=False, unique=True)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'))
+    date_added = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
 
     def __repr__(self):
         return f'<Book {self.title}>'
-
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -99,6 +103,7 @@ class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
     books = db.relationship('Book', backref='section')  # Relationship with Book model
+    date_added = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
 
     def __repr__(self):
         return f'<Section {self.name}>'

@@ -4,8 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
 </head>
 <body>
+    <header>
+        <h1>Welcome to the Librarian Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('add_book') }}">Add New Book</a></li>
+                <li><a href="{{ url_for('add_section') }}">Manage Sections</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li><a href="{{ url_for('librarian_statistics') }}">Library Statistics</a></li>
+                <!-- Add more navigation links as needed -->
+            </ul>
+        </nav>
+    </header>
     <h1>Add New Book</h1>
     <form action="{{ url_for('add_book') }}" method="post">
         <label for="title">Title:</label>

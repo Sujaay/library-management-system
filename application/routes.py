@@ -2,6 +2,8 @@ from flask import render_template, request, redirect, url_for, session, request,
 from application import app, db
 from application.models import *
 from flask_login import login_required, current_user, login_user, logout_user, LoginManager
+from datetime import datetime, date, timedelta
+from sqlalchemy import func
 
 
 # Initialize Flask-Login
@@ -16,8 +18,6 @@ def load_user(user_id):
 @app.route('/')
 def index():
     return render_template('login.html')
-  
-from application.models import User, Librarian  # Import User and Librarian models
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -255,3 +255,38 @@ def delete_book(book_id):
              # Handle database errors gracefully (e.g., foreign key constraints)
              flash(f'Error deleting book: {e}', 'danger')
              return redirect(url_for('list_books_by_section', section_id=book.section_id))
+         
+@app.route('/librarian/statistics')
+@login_required
+def librarian_statistics():
+    # Query to get the count of new books added each day for the last week
+    books_data = db.session.query(func.date(Book.date_added), func.count(Book.id)).\
+        filter(Book.date_added >= (datetime.now() - timedelta(days=7))).\
+        group_by(func.date(Book.date_added)).all()
+    
+    # Extracting labels and data for books chart
+    books_labels = [str(entry[0]) for entry in books_data]
+    books_count = [entry[1] for entry in books_data]
+    
+    # Query to get the count of new sections added each day for the last week
+    sections_data = db.session.query(func.date(Section.date_added), func.count(Section.id)).\
+        filter(Section.date_added >= (datetime.now() - timedelta(days=7))).\
+        group_by(func.date(Section.date_added)).all()
+    
+    # Extracting labels and data for sections chart
+    sections_labels = [str(entry[0]) for entry in sections_data]
+    sections_count = [entry[1] for entry in sections_data]
+    
+    # Query to get the count of new users registered today
+    new_users_count = User.query.filter(func.date(User.date_registered) == date.today()).count()
+    
+    # Query to get the count of users logged in today
+    users_logged_in_today = User.query.filter(func.date(User.last_login) == date.today()).count()
+    
+    return render_template('librarian/library_statistics.html', 
+                           books_labels=books_labels, 
+                           books_data=books_count, 
+                           sections_labels=sections_labels, 
+                           sections_data=sections_count, 
+                           new_users_count=new_users_count, 
+                           users_logged_in_today=users_logged_in_today)
