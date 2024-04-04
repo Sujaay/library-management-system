@@ -47,6 +47,28 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.name}>'
 
+class Librarian(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(100), nullable=False, unique=True)
+    password = db.Column(db.String(128), nullable=False)
+
+    def __init__(self, name, email, password):
+        self.name = name
+        self.email = email
+        self.set_password(password)
+
+    def set_password(self, password):
+        # Hash the password using bcrypt
+        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    def check_password(self, password):
+        # Check if the provided password matches the stored hash
+        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
+
+    def __repr__(self):
+        return f'<Librarian {self.name}>'
+
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)

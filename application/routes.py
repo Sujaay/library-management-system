@@ -3,6 +3,7 @@ from application import app, db
 from application.models import *
 from flask_login import login_required, current_user, login_user, logout_user, LoginManager
 
+
 # Initialize Flask-Login
 login_manager = LoginManager()
 login_manager.login_view = 'login'
@@ -16,6 +17,8 @@ def load_user(user_id):
 def index():
     return render_template('login.html')
   
+from application.models import User, Librarian  # Import User and Librarian models
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
@@ -28,13 +31,23 @@ def register():
         address = request.form['address']
         gender = request.form.get('gender')
         role = request.form.get('role')
-        user = User(name=name, email=email, phone=phone, password=password, address=address, gender=gender, role=role)
-        db.session.add(user)
+
+        if role == 'user':
+            # Create a new user instance and add it to the database
+            user = User(name=name, email=email, phone=phone, password=password, address=address, gender=gender, role=role)
+            db.session.add(user)
+        elif role == 'librarian':
+            # Create a new librarian instance and add it to the database
+            librarian = Librarian(name=name, email=email, password=password)
+            db.session.add(librarian)
+        else:
+            flash('Invalid role selected. Please try again.', 'danger')
+            return redirect(url_for('register'))
+
         db.session.commit()
         flash('Registration successful. Please log in.', 'success')
         return redirect(url_for('login'))
 
-from flask import request, redirect, url_for, render_template, flash
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -57,17 +70,16 @@ def login():
                 return redirect(url_for('login'))
 
         elif role == 'librarian':
-            # You should implement your own authentication logic for librarians here
-            if email == 'admin@gmail.com' and password == 'admin':
-                print('Login successful!', 'success')
+            librarian = Librarian.query.filter_by(email=email).first()
+            if librarian and librarian.check_password(password):
+                session['librarian_id'] = librarian.id
+                login_user(librarian)
+                flash('Login successful!', 'success')
                 return redirect(url_for('librarian_dashboard'))
             else:
-                print('Invalid email or password. Please try again.', 'danger')
+                flash('Invalid email or password. Please try again.', 'danger')
                 return redirect(url_for('login'))
 
-        else:
-            flash('Invalid role selected. Please try again.', 'danger')
-            return redirect(url_for('login'))
 
         
 @app.route('/logout')
