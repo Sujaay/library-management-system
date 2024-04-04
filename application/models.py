@@ -47,17 +47,17 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.name}>'
 
-
-
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     author = db.Column(db.String(100), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    isbn = db.Column(db.String(20), nullable=False, unique=True)
+    section_id = db.Column(db.Integer, db.ForeignKey('section.id'))
 
     def __repr__(self):
         return f'<Book {self.title}>'
-    
+
+
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
@@ -72,15 +72,18 @@ class Author(db.Model):
     def __repr__(self):
         return f'<Author {self.name}>'
 
+# Add a Section model for book categorization (optional)
+class Section(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    books = db.relationship('Book', backref='section')  # Relationship with Book model
+
+    def __repr__(self):
+        return f'<Section {self.name}>'
+
 class Checkout(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
     checkout_date = db.Column(db.DateTime, nullable=False)
     return_date = db.Column(db.DateTime, nullable=True)
-
-    user = db.relationship('User', backref=db.backref('checkouts', lazy=True))
-    book = db.relationship('Book', backref=db.backref('checkouts', lazy=True))
-
-    def __repr__(self):
-        return f'<Checkout {self.id}>'

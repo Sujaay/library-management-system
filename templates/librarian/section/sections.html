@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Sections</title>
+</head>
+<body>
+    <h1>Manage Sections</h1>
+    <ul>
+        {% for section in sections %}
+            <li>{{ section.name }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('add_section') }}">Add New Section</a>
+</body>
+</html>

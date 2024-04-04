@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/static/login.css">
-    <title>Login | MAD 1 Project</title>
+    <title>Login | Library Management System</title>
 </head>
 <body>
     <form action="/login" method="post">
@@ -12,6 +12,11 @@
         <input type="email" name="email" id="email">
         <label for="password">Password: </label>
         <input type="password" name="password" id="password">
+        <label for="role">Role: </label>
+        <select name="role" id="role">
+            <option value="user">User</option>
+            <option value="librarian">Librarian</option>
+        </select>
         <button type="submit">Login</button>
     </form>
     <p>Don't have an account? <a href="/register">Register</a></p>

@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, session, request
+from flask import render_template, request, redirect, url_for, session, request, flash
 from application import app, db
 from application.models import *
 from flask_login import login_required, current_user, login_user, logout_user, LoginManager
@@ -14,8 +14,8 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
+    return render_template('login.html')
+  
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
@@ -26,12 +26,15 @@ def register():
         phone = request.form['phone']
         password = request.form['password']
         address = request.form['address']
-        gender = request.form.get('gender')  # Get the selected gender value
-        role = request.form.get('role')  # Get the selected role value
+        gender = request.form.get('gender')
+        role = request.form.get('role')
         user = User(name=name, email=email, phone=phone, password=password, address=address, gender=gender, role=role)
         db.session.add(user)
         db.session.commit()
+        flash('Registration successful. Please log in.', 'success')
         return redirect(url_for('login'))
+
+from flask import request, redirect, url_for, render_template, flash
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -40,22 +43,39 @@ def login():
     else:
         email = request.form['email']
         password = request.form['password']
-        user = User.query.filter_by(email=email).first()
-        if user and user.check_password(password):
-            session['user_id'] = user.id  # Store user ID in session upon successful login
-            login_user(user)  # Login the user
-            print("Login Successful and logged in user", user)
-            return redirect(url_for('user_dashboard'))
+        role = request.form['role']  # Get the selected role from the form
+
+        if role == 'user':
+            user = User.query.filter_by(email=email).first()
+            if user and user.check_password(password):
+                session['user_id'] = user.id
+                login_user(user)
+                flash('Login successful!', 'success')
+                return redirect(url_for('user_dashboard'))
+            else:
+                flash('Invalid email or password. Please try again.', 'danger')
+                return redirect(url_for('login'))
+
+        elif role == 'librarian':
+            # You should implement your own authentication logic for librarians here
+            if email == 'admin@gmail.com' and password == 'admin':
+                print('Login successful!', 'success')
+                return redirect(url_for('librarian_dashboard'))
+            else:
+                print('Invalid email or password. Please try again.', 'danger')
+                return redirect(url_for('login'))
+
         else:
-            print("Wrong password or email")
-            return render_template('login.html')
+            flash('Invalid role selected. Please try again.', 'danger')
+            return redirect(url_for('login'))
 
         
 @app.route('/logout')
 @login_required
 def logout():
-    logout_user()  # Log out the user
-    session.clear()  # Clear the session
+    logout_user()
+    session.clear()
+    flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
 @app.route('/user_dashboard')
@@ -120,3 +140,106 @@ def update_account_settings():
 def user_browse_sections():
     # Add logic here to browse different sections of the library
     return render_template('user_browse_sections.html')
+
+
+@app.route('/librarian/dashboard')
+@login_required
+def librarian_dashboard():
+    # Add logic for librarian dashboard here
+    return render_template('librarian/dashboard.html')
+
+@app.route('/librarian/sections')
+@login_required
+def list_sections():
+    sections = Section.query.all()
+    return render_template('librarian/section/sections.html', sections=sections)
+
+@app.route('/librarian/sections/add', methods=['GET', 'POST'])
+@login_required
+def add_section():
+    if request.method == 'GET':
+        return render_template('librarian/section/add_section.html')
+    elif request.method == 'POST':
+        section_name = request.form.get('section_name')
+        if section_name:
+            # Create a new Section object
+            new_section = Section(name=section_name)
+            # Add the new section to the database session
+            db.session.add(new_section)
+            # Commit the changes to the database
+            db.session.commit()
+            return redirect(url_for('librarian_dashboard'))
+        else:
+            # Handle case where section name is not provided
+            return render_template('librarian/section/add_section.html', error='Section name is required')
+
+@app.route('/librarian/sections/<int:section_id>/books')
+@login_required
+def list_books_by_section(section_id):
+    section = Section.query.get_or_404(section_id)
+    books = Book.query.filter_by(section_id=section.id).all()
+    return render_template('librarian/section/books.html', section=section, books=books)
+
+@app.route('/librarian/books/add', methods=['GET', 'POST'])
+@login_required
+def add_book():
+    if request.method == 'GET':
+        sections = Section.query.all()
+        return render_template('librarian/book/add.html', sections=sections)
+    else:
+        title = request.form['title']
+        author = request.form['author']
+        isbn = request.form['isbn']
+        section_id = request.form['section_id']
+        new_book = Book(title=title, author=author, isbn=isbn, section_id=section_id)
+        try:
+            db.session.add(new_book)
+            db.session.commit()
+            flash('Book added successfully!', 'success')
+            return redirect(url_for('librarian_dashboard'))
+        except Exception as e:
+            # Handle database errors gracefully (e.g., duplicate ISBN)
+            flash(f'Error adding book: {e}', 'danger')
+            return render_template('librarian/book/add.html', sections=Section.query.all())
+
+@app.route('/librarian/books/<int:book_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    sections = Section.query.all()
+    if request.method == 'GET':
+        return render_template('librarian/book/edit.html', book=book, sections=sections)
+    else:
+        title = request.form['title']
+        author = request.form['author']
+        isbn = request.form['isbn']
+        section_id = request.form['section_id']
+        book.title = title
+        book.author = author
+        book.isbn = isbn
+        book.section_id = section_id
+        try:
+            db.session.commit()
+            flash('Book edited successfully!', 'success')
+            return redirect(url_for('list_books_by_section', section_id=book.section_id))
+        except Exception as e:
+            # Handle database errors gracefully
+            flash(f'Error editing book: {e}', 'danger')
+            return render_template('librarian/book/edit.html', book=book, sections=sections)
+
+@app.route('/librarian/books/<int:book_id>/delete', methods=['GET', 'POST'])
+@login_required
+def delete_book(book_id):
+     book = Book.query.get_or_404(book_id)
+     if request.method == 'GET':
+         return render_template('librarian/book/delete.html', book=book)
+     else:
+         try:
+             db.session.delete(book)
+             db.session.commit()
+             flash('Book deleted successfully!', 'success')
+             return redirect(url_for('list_books_by_section', section_id=book.section_id))
+         except Exception as e:
+             # Handle database errors gracefully (e.g., foreign key constraints)
+             flash(f'Error deleting book: {e}', 'danger')
+             return redirect(url_for('list_books_by_section', section_id=book.section_id))

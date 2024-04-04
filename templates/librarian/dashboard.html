@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Librarian Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_dashboard.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Librarian Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('add_book') }}">Add New Book</a></li>
+                <li><a href="{{ url_for('add_section') }}">Manage Sections</a></li>
+                <!-- Add more navigation links as needed -->
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="recent-additions">
+            <h2>Recent Book Additions</h2>
+            <ul>
+                {% for book in recent_additions %}
+                    <li>{{ book.title }} by {{ book.author }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section class="book-stats">
+            <h2>Library Statistics</h2>
+            <!-- Add statistics or charts displaying library metrics -->
+        </section>
+        <section class="user-activity">
+            <h2>User Activity</h2>
+            <!-- Add user activity logs, recent transactions, or other relevant information -->
+        </section>
+        <!-- Add more sections or content as needed -->
+    </main>
+    <footer>
+        <p>&copy; 2024 Library Management System</p>
+    </footer>
+</body>
+</html>

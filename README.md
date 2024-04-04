@@ -14,9 +14,10 @@
 - For windows `python app.py`
 
 
+
 ```
 library management system
-
+├─ .git
 ├─ .gitignore
 ├─ app.py
 ├─ application
@@ -35,10 +36,21 @@ library management system
 ├─ README.md
 ├─ requirements.txt
 ├─ static
+│  ├─ librarian_dashboard.css
 │  ├─ login.css
 │  └─ register.css
 ├─ templates
 │  ├─ index.html
+│  ├─ librarian
+│  │  ├─ book
+│  │  │  ├─ add.html
+│  │  │  ├─ delete.html
+│  │  │  └─ edit.html
+│  │  ├─ dashboard.html
+│  │  └─ section
+│  │     ├─ add_section.html
+│  │     ├─ books.html
+│  │     └─ sections.html
 │  ├─ login.html
 │  ├─ register.html
 │  ├─ user_account_settings.html
