@@ -11,10 +11,10 @@
         <h1>Welcome to the Librarian Dashboard</h1>
         <nav>
             <ul>
-                <li><a href="{{ url_for('add_book') }}">Add New Book</a></li>
+                <li><a href="{{ url_for('librarian_dashboard') }}">Home</a></li>
                 <li><a href="{{ url_for('add_section') }}">Manage Sections</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 <li><a href="{{ url_for('librarian_statistics') }}">Library Statistics</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 <!-- Add more navigation links as needed -->
             </ul>
         </nav>
@@ -33,6 +33,10 @@
                 <option value="{{ section.id }}">{{ section.name }}</option>
             {% endfor %}
         </select><br>
+        <label for="image">Image URL:</label>
+        <input type="text" name="image" id="image" required><br>
+        <label for="pdf_link">PDF Link:</label>
+        <input type="text" name="pdf_link" id="pdf_link" required><br>
         <button type="submit">Add Book</button>
     </form>
 </body>

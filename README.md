@@ -15,10 +15,11 @@
 
 
 
+
 ```
 library management system
-├─ .git
 ├─ .gitignore
+├─ add_data.py
 ├─ app.py
 ├─ application
 │  ├─ database.py
@@ -31,12 +32,18 @@ library management system
 │     ├─ models.cpython-311.pyc
 │     ├─ routes.cpython-311.pyc
 │     └─ __init__.cpython-311.pyc
+├─ components
+│  ├─ Footer.html
+│  └─ navbar.html
 ├─ instance
 │  └─ database.sqlite3
 ├─ README.md
 ├─ requirements.txt
 ├─ static
+│  ├─ favicon.ico
 │  ├─ librarian_dashboard.css
+│  ├─ librarian_nav.css
+│  ├─ library_statistics.css
 │  ├─ login.css
 │  └─ register.css
 ├─ templates
@@ -46,7 +53,8 @@ library management system
 │  │  │  ├─ add.html
 │  │  │  ├─ delete.html
 │  │  │  └─ edit.html
-│  │  ├─ dashboard.html
+│  │  ├─ librarian_dashboard.html
+│  │  ├─ library_statistics.html
 │  │  └─ section
 │  │     ├─ add_section.html
 │  │     ├─ books.html

@@ -11,14 +11,14 @@
         <h1>Welcome to the Librarian Dashboard</h1>
         <nav>
             <ul>
-                <li><a href="{{ url_for('add_book') }}">Add New Book</a></li>
+                <li><a href="{{ url_for('librarian_dashboard') }}">Home</a></li>
                 <li><a href="{{ url_for('add_section') }}">Manage Sections</a></li>
                 <li><a href="{{ url_for('logout') }}">Logout</a></li>
                 <li><a href="{{ url_for('librarian_statistics') }}">Library Statistics</a></li>
                 <!-- Add more navigation links as needed -->
             </ul>
         </nav>
-    </header>
+    </header> 
     <h1>Add New Section</h1>
     <form action="{{ url_for('add_section') }}" method="post">
         <label for="section_name">Section Name:</label>

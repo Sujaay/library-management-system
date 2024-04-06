@@ -35,6 +35,7 @@ def register():
         if role == 'user':
             # Create a new user instance and add it to the database
             user = User(name=name, email=email, phone=phone, password=password, address=address, gender=gender, role=role)
+            user.date_registered = datetime.now()  # Set the registration date
             db.session.add(user)
         elif role == 'librarian':
             # Create a new librarian instance and add it to the database
@@ -47,6 +48,7 @@ def register():
         db.session.commit()
         flash('Registration successful. Please log in.', 'success')
         return redirect(url_for('login'))
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -62,6 +64,8 @@ def login():
             user = User.query.filter_by(email=email).first()
             if user and user.check_password(password):
                 session['user_id'] = user.id
+                user.last_login = datetime.now()  # Set the last_login attribute
+                db.session.commit()  # Commit changes to the database
                 login_user(user)
                 flash('Login successful!', 'success')
                 return redirect(url_for('user_dashboard'))
@@ -73,13 +77,14 @@ def login():
             librarian = Librarian.query.filter_by(email=email).first()
             if librarian and librarian.check_password(password):
                 session['librarian_id'] = librarian.id
+                librarian.last_login = datetime.now()  # Set the last_login attribute
+                db.session.commit()  # Commit changes to the database
                 login_user(librarian)
                 flash('Login successful!', 'success')
                 return redirect(url_for('librarian_dashboard'))
             else:
                 flash('Invalid email or password. Please try again.', 'danger')
                 return redirect(url_for('login'))
-
 
         
 @app.route('/logout')
@@ -153,18 +158,13 @@ def user_browse_sections():
     # Add logic here to browse different sections of the library
     return render_template('user_browse_sections.html')
 
-
 @app.route('/librarian/dashboard')
 @login_required
 def librarian_dashboard():
-    # Add logic for librarian dashboard here
-    return render_template('librarian/dashboard.html')
-
-@app.route('/librarian/sections')
-@login_required
-def list_sections():
     sections = Section.query.all()
-    return render_template('librarian/section/sections.html', sections=sections)
+    current_date = datetime.now().strftime('%Y-%m-%d')
+    section_id = None  # Set a default value for section_id
+    return render_template('librarian/librarian_dashboard.html', sections=sections, current_date=current_date, section_id=section_id)
 
 @app.route('/librarian/sections/add', methods=['GET', 'POST'])
 @login_required
@@ -290,3 +290,34 @@ def librarian_statistics():
                            sections_data=sections_count, 
                            new_users_count=new_users_count, 
                            users_logged_in_today=users_logged_in_today)
+
+from application.models import Section
+
+@app.route('/edit_section/<int:section_id>', methods=['GET', 'POST'])
+def edit_section(section_id):
+    # Retrieve section data
+    section = Section.query.get_or_404(section_id)
+
+    if request.method == 'POST':
+        # Retrieve form data
+        new_section_name = request.form['section_name']
+
+        # Update section object
+        section.name = new_section_name
+
+        # Commit changes to the database
+        db.session.commit()
+
+        # Flash a success message and redirect to the dashboard
+        flash('Section updated successfully', 'success')
+        return redirect(url_for('librarian_dashboard'))
+    else:
+        # Render edit_section.html template with section data
+        return render_template('librarian/section/edit_section.html', section=section)
+
+
+
+@app.route('/add_book', methods=['GET'])
+def add_book_page():
+    # Render the add book template
+    return render_template('add_book.html')

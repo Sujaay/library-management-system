@@ -80,16 +80,11 @@ class Book(db.Model):
     isbn = db.Column(db.String(20), nullable=False, unique=True)
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'))
     date_added = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    image = db.Column(db.String(255), nullable=True)  # Image URL or file path
+    pdf_link = db.Column(db.String(255), nullable=True)  # PDF link for the book
 
     def __repr__(self):
         return f'<Book {self.title}>'
-
-class Category(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-
-    def __repr__(self):
-        return f'<Category {self.name}>'
 
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -98,19 +93,11 @@ class Author(db.Model):
     def __repr__(self):
         return f'<Author {self.name}>'
 
-# Add a Section model for book categorization (optional)
 class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
-    books = db.relationship('Book', backref='section')  # Relationship with Book model
+    image = db.Column(db.String(255), nullable=True)  # Image URL or file path
     date_added = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
 
     def __repr__(self):
         return f'<Section {self.name}>'
-
-class Checkout(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
-    checkout_date = db.Column(db.DateTime, nullable=False)
-    return_date = db.Column(db.DateTime, nullable=True)

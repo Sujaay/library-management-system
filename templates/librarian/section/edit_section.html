@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Section</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}"> <!-- Example CSS file -->
+</head>
+<body>
+    <header>
+        <h1>Edit Section</h1>
+    </header>
+    <main>
+        <form action="{{ url_for('edit_section', section_id=section.id) }}" method="post">
+            <label for="section_name">Section Name:</label>
+            <input type="text" name="section_name" id="section_name" value="{{ section.name }}" required><br>
+            <!-- Additional input fields for other section details if needed -->
+            <button type="submit">Save Changes</button>
+        </form>        
+    </main>
+    <footer>
+        <a href="{{ url_for('librarian_dashboard') }}">Cancel</a> <!-- Link to cancel and go back to the dashboard -->
+    </footer>
+</body>
+</html>
