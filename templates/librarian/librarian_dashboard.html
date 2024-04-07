@@ -11,8 +11,9 @@
         <nav>
             <ul>
                 <li><a href="{{ url_for('librarian_dashboard') }}" class="dashboard-link">Librarian Dashboard</a></li>
-                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
                 <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
+
             </ul>
         </nav>
     </header>
@@ -36,22 +37,63 @@
                         <h3>{{ section.name }}</h3>
                         <p>{{ section.description }}</p>
                         <p>Number of Books: {{ section.book_count }}</p>
-                        <!-- Add section image here if available -->
+                     
+<!--     Remove comment to get images of the section                   
                         {% if section.image %}
                             <img src="{{ section.image }}" alt="Section Image">
                         {% endif %}
+-->
                         <div class="section-buttons">
-                            <button>Edit Section</button> <!-- Button to edit the section -->
-                            <button>Delete Section</button> <!-- Button to delete the section -->
-                            <button>Add Book</button> <!-- Button to add a new book -->
+                            <button onclick="editSection({{ section.id }})">Edit Section</button> <!-- Button to edit the section -->
+                            <button onclick="deleteSection({{ section.id }})">Delete Section</button> <!-- Button to delete the section -->
+                            <button onclick="addBook({{ section.id }})">Add Book</button> <!-- Button to add a new book -->
                         </div>
                     </div>
                 {% endfor %}
             </div>
         </section>
+
+        <button id="add-section-button" onclick="redirectToSectionAdd()">Add New Section</button>
+
     </main>
     <footer>
         <p>&copy; 2024 Library Management System</p>
     </footer>
+
+    <script>
+        function editSection(sectionId) {
+            // Define editSection functionality here
+            window.location.href = "/edit_section/" + sectionId;
+        }
+
+        function deleteSection(sectionId) {
+            // Assume here you want to confirm deletion and then make an AJAX request to delete the section
+            if (confirm("Are you sure you want to delete this section?")) {
+                // Example AJAX request to delete the section
+                $.ajax({
+                    url: "/librarian/sections/" + sectionId + "/delete",
+                    type: "POST",
+                    success: function(response) {
+                        // Assuming you want to reload the page after successful deletion
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Error deleting section: " + error);
+                    }
+                });
+            }
+        }
+    
+        // Function to handle adding a book to a section
+        function addBook(sectionId) {
+            // Assume here you want to redirect to add_book.html with the section ID
+            window.location.href = "/librarian/books/add?section_id=" + sectionId;
+        }
+
+        function redirectToSectionAdd() {
+            // Redirect to section_add.html
+            window.location.href = "{{ url_for('add_section') }}";
+        }
+    </script>
 </body>
 </html>

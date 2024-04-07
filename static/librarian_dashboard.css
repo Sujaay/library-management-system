@@ -16,21 +16,10 @@ header {
     padding: 20px;
 }
 
-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-nav h1 {
-    margin: 0;
-    font-size: 24px;
-    color: #fff; /* Set navbar text color to white */
-    text-decoration: none; /* Remove underline */
-}
-
 nav ul {
     list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
 
 nav ul li {
@@ -39,15 +28,17 @@ nav ul li {
 }
 
 nav ul li a {
-    color: #fff; /* Set navbar text color to white */
-    text-decoration: none; /* Remove underline */
+    color: #fff;
+    text-decoration: none;
 }
 
-.navbar-right a {
-    color: #fff; /* Set navbar text color to white */
-    text-decoration: none; /* Remove underline */
+nav ul li a.dashboard-link {
+    font-weight: bold;
 }
 
+.navbar-right {
+    float: right;
+}
 
 main {
     padding: 20px;

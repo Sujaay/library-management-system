@@ -4,26 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Section</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='add_section.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
 </head>
 <body>
     <header>
-        <h1>Welcome to the Librarian Dashboard</h1>
         <nav>
             <ul>
-                <li><a href="{{ url_for('librarian_dashboard') }}">Home</a></li>
-                <li><a href="{{ url_for('add_section') }}">Manage Sections</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                <li><a href="{{ url_for('librarian_statistics') }}">Library Statistics</a></li>
-                <!-- Add more navigation links as needed -->
+                <li><a href="{{ url_for('librarian_dashboard') }}" class="dashboard-link">Librarian Dashboard</a></li>
+                <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
             </ul>
         </nav>
-    </header> 
+    </header>
+    
     <h1>Add New Section</h1>
     <form action="{{ url_for('add_section') }}" method="post">
         <label for="section_name">Section Name:</label>
         <input type="text" name="section_name" id="section_name" required><br>
+        <label for="section_image">Section Image URL:</label>
+        <input type="text" name="section_image" id="section_image"><br>
         <button type="submit">Add Section</button>
     </form>
+    <footer>
+        <p>&copy; 2024 Library Management System</p>
+    </footer>
 </body>
 </html>
