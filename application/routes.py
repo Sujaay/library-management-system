@@ -158,13 +158,108 @@ def user_browse_sections():
     # Add logic here to browse different sections of the library
     return render_template('user_browse_sections.html')
 
+
+# LIBRARIAN ROUTES
+
 @app.route('/librarian/dashboard')
 @login_required
 def librarian_dashboard():
-    sections = Section.query.all()
-    current_date = datetime.now().strftime('%Y-%m-%d')
-    section_id = None  # Set a default value for section_id
-    return render_template('librarian/librarian_dashboard.html', sections=sections, current_date=current_date, section_id=section_id)
+    sections = Section.query.all()  # Assuming you have a way to fetch all sections
+    current_date = datetime.utcnow()  # Example for current date
+    return render_template('librarian/librarian_dashboard.html', sections=sections, current_date=current_date)
+
+
+
+@app.route('/edit_section/<int:section_id>', methods=['GET', 'POST'])
+def edit_section(section_id):
+    section = Section.query.get_or_404(section_id)
+
+    if request.method == 'POST':
+        # Handle form submission for editing the section
+        try:
+            # Get form data and update section model attributes
+            section.name = request.form['name']  # Replace with actual form fields
+            section.description = request.form['description']  # Example
+            # ... other updates
+            db.session.commit()
+            flash('Section updated successfully!', 'success')
+            return redirect(url_for('librarian_dashboard'))  # Redirect to appropriate page
+        except Exception as e:
+            flash('Error updating section: ' + str(e), 'danger')
+
+    # Render the edit section form
+    return render_template('edit_section.html', section=section)
+
+# @app.route('/edit_section/<int:section_id>', methods=['GET', 'POST'])
+# @login_required
+# def edit_section(section_id):
+#     section = Section.query.get_or_404(section_id)
+#     if request.method == 'POST':
+#         new_section_name = request.form['section_name']
+#         section.name = new_section_name
+#         db.session.commit()
+#         flash('Section updated successfully', 'success')
+#         return redirect(url_for('librarian_dashboard'))
+#     else:
+#         return render_template('librarian/section/edit_section.html', section=section)
+
+@app.route('/delete_section/<int:section_id>', methods=['DELETE'])
+def delete_section(section_id):
+    section = Section.query.get_or_404(section_id)
+
+    try:
+        db.session.delete(section)
+        db.session.commit()
+        return jsonify({'message': 'Section deleted successfully'})  # Assuming JS expects JSON response
+    except Exception as e:
+        return jsonify({'error': 'Error deleting section: ' + str(e)}), 500
+
+@app.route('/add_book/<int:section_id>', methods=['GET', 'POST'])
+def add_book(section_id):
+    section = Section.query.get_or_404(section_id)
+
+    if request.method == 'POST':
+        # Handle form submission for adding a book
+        try:
+            # Create a new book instance and add it to the section
+            book = Book(
+                title=request.form['title'],  # Replace with actual form fields
+                author=request.form['author'],
+                # ... other fields
+                section=section
+            )
+            db.session.add(book)
+            db.session.commit()
+            flash('Book added successfully!', 'success')
+            return redirect(url_for('view_section', section_id=section_id))  # Example redirect
+        except Exception as e:
+            flash('Error adding book: ' + str(e), 'danger')
+
+    # Render the add book form
+    return render_template('add_book.html', section=section)
+
+# @app.route('/librarian/books/add', methods=['GET', 'POST'])
+# @login_required
+# def add_book():
+#     if request.method == 'GET':
+#         sections = Section.query.all()
+#         return render_template('librarian/book/add.html', sections=sections)
+#     else:
+#         title = request.form['title']
+#         author = request.form['author']
+#         isbn = request.form['isbn']
+#         section_id = request.form['section_id']
+#         new_book = Book(title=title, author=author, isbn=isbn, section_id=section_id)
+#         try:
+#             db.session.add(new_book)
+#             db.session.commit()
+#             flash('Book added successfully!', 'success')
+#             return redirect(url_for('librarian_dashboard'))
+#         except Exception as e:
+#             # Handle database errors gracefully (e.g., duplicate ISBN)
+#             flash(f'Error adding book: {e}', 'danger')
+#             return render_template('librarian/book/add_book.html', sections=Section.query.all())
+
 
 @app.route('/librarian/sections/add', methods=['GET', 'POST'])
 @login_required
@@ -174,15 +269,11 @@ def add_section():
     elif request.method == 'POST':
         section_name = request.form.get('section_name')
         if section_name:
-            # Create a new Section object
             new_section = Section(name=section_name)
-            # Add the new section to the database session
             db.session.add(new_section)
-            # Commit the changes to the database
             db.session.commit()
             return redirect(url_for('librarian_dashboard'))
         else:
-            # Handle case where section name is not provided
             return render_template('librarian/section/add_section.html', error='Section name is required')
 
 @app.route('/librarian/sections/<int:section_id>/books')
@@ -192,27 +283,6 @@ def list_books_by_section(section_id):
     books = Book.query.filter_by(section_id=section.id).all()
     return render_template('librarian/section/books.html', section=section, books=books)
 
-@app.route('/librarian/books/add', methods=['GET', 'POST'])
-@login_required
-def add_book():
-    if request.method == 'GET':
-        sections = Section.query.all()
-        return render_template('librarian/book/add.html', sections=sections)
-    else:
-        title = request.form['title']
-        author = request.form['author']
-        isbn = request.form['isbn']
-        section_id = request.form['section_id']
-        new_book = Book(title=title, author=author, isbn=isbn, section_id=section_id)
-        try:
-            db.session.add(new_book)
-            db.session.commit()
-            flash('Book added successfully!', 'success')
-            return redirect(url_for('librarian_dashboard'))
-        except Exception as e:
-            # Handle database errors gracefully (e.g., duplicate ISBN)
-            flash(f'Error adding book: {e}', 'danger')
-            return render_template('librarian/book/add.html', sections=Section.query.all())
 
 @app.route('/librarian/books/<int:book_id>/edit', methods=['GET', 'POST'])
 @login_required
@@ -293,31 +363,7 @@ def librarian_statistics():
 
 from application.models import Section
 
-@app.route('/edit_section/<int:section_id>', methods=['GET', 'POST'])
-def edit_section(section_id):
-    # Retrieve section data
-    section = Section.query.get_or_404(section_id)
-
-    if request.method == 'POST':
-        # Retrieve form data
-        new_section_name = request.form['section_name']
-
-        # Update section object
-        section.name = new_section_name
-
-        # Commit changes to the database
-        db.session.commit()
-
-        # Flash a success message and redirect to the dashboard
-        flash('Section updated successfully', 'success')
-        return redirect(url_for('librarian_dashboard'))
-    else:
-        # Render edit_section.html template with section data
-        return render_template('librarian/section/edit_section.html', section=section)
-
-
-
 @app.route('/add_book', methods=['GET'])
+@login_required
 def add_book_page():
-    # Render the add book template
-    return render_template('add_book.html')
+    return render_template('librarian/book/add.html')

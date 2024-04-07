@@ -1,6 +1,8 @@
 import bcrypt
 from application.database import db
 from flask_login import UserMixin
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -78,10 +80,12 @@ class Book(db.Model):
     title = db.Column(db.String(100), nullable=False)
     author = db.Column(db.String(100), nullable=False)
     isbn = db.Column(db.String(20), nullable=False, unique=True)
-    section_id = db.Column(db.Integer, db.ForeignKey('section.id'))
+    section_id = db.Column(ForeignKey('section.id'))
     date_added = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     image = db.Column(db.String(255), nullable=True)  # Image URL or file path
     pdf_link = db.Column(db.String(255), nullable=True)  # PDF link for the book
+    
+    section = relationship('Section', backref='books')  # Relationship with Section model
 
     def __repr__(self):
         return f'<Book {self.title}>'
@@ -101,3 +105,8 @@ class Section(db.Model):
 
     def __repr__(self):
         return f'<Section {self.name}>'
+    
+    @property
+    def book_count(self):
+        # Calculate the number of books associated with the section
+        return len(self.books) or 0  # Handle potential empty list

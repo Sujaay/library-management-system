@@ -2,7 +2,6 @@ from flask import Flask
 from application.database import db
 from application.models import User
 from flask_login import LoginManager
-from application.models import User  # Import your User model
 
 app = Flask(__name__, template_folder="../templates", static_folder='../static')
 app.config['SECRET_KEY'] = 'aush33rf4r2gflashfaoi' 
