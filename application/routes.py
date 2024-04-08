@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, session, request, flash
+from flask import render_template, request, redirect, url_for, session, request, flash, jsonify
 from application import app, db
 from application.models import *
 from flask_login import login_required, current_user, login_user, logout_user, LoginManager
@@ -182,22 +182,20 @@ def edit_section(section_id):
 
 # Route for deleting a section
 @app.route('/librarian/sections/<int:section_id>/delete', methods=['POST'])
+@login_required
 def delete_section(section_id):
-    # Assume logic for deleting a section here
+    section = Section.query.get_or_404(section_id)
     try:
-        # Delete the section from the database
-        flash('Section deleted successfully!', 'success')
-        return redirect(url_for('librarian_dashboard'))
-    except Exception as e:
-        flash(f'Error deleting section: {e}', 'danger')
-        return redirect(url_for('librarian_dashboard'))
+        # Delete the books associated with the section
+        Book.query.filter_by(section_id=section.id).delete()
 
-# Route for adding a book to a section
-@app.route('/librarian/books/add', methods=['GET'])
-def add_book():
-    # Assume logic for adding a book here
-    sections = Section.query.all()
-    return render_template('add_book.html', sections=sections)
+        # Delete the section itself
+        db.session.delete(section)
+        db.session.commit()
+        return jsonify({'message': 'Section deleted successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 @app.route('/librarian/sections/add', methods=['GET', 'POST'])
 @login_required
