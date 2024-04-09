@@ -5,22 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Book</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='add_book.css') }}">
 </head>
 <body>
     <header>
-        <h1>Welcome to the Librarian Dashboard</h1>
+        <h1>Add New Book</h1>
         <nav>
             <ul>
-                <li><a href="{{ url_for('librarian_dashboard') }}">Home</a></li>
-                <li><a href="{{ url_for('add_section') }}">Manage Sections</a></li>
-                <li><a href="{{ url_for('librarian_statistics') }}">Library Statistics</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li><a href="{{ url_for('librarian_dashboard') }}">Back to Dashboard</a></li>
                 <!-- Add more navigation links as needed -->
             </ul>
         </nav>
     </header>
-    <h1>Add New Book</h1>
-    <form action="{{ url_for('add_book') }}" method="post">
+    <form action="{{ url_for('add_book', section_id=section_id) }}" method="post" class="add-book-form">
         <label for="title">Title:</label>
         <input type="text" name="title" id="title" required><br>
         <label for="author">Author:</label>
@@ -29,6 +26,7 @@
         <input type="text" name="isbn" id="isbn" required><br>
         <label for="section_id">Section:</label>
         <select name="section_id" id="section_id" required>
+            <option value="" disabled selected>Select a Section</option>
             {% for section in sections %}
                 <option value="{{ section.id }}">{{ section.name }}</option>
             {% endfor %}

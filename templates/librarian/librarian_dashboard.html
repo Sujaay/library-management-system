@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Librarian Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='librarian_dashboard.css') }}">
+    <link rel ="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -14,54 +15,103 @@
                 <li><a href="{{ url_for('librarian_dashboard') }}" class="dashboard-link">Librarian Dashboard</a></li>
                 <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
                 <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
-
             </ul>
         </nav>
     </header>
 
     <main>
         <div class="search-filter">
-            <input type="text" placeholder="Search...">
-            <button>Search</button>
+            <input type="text" id="search-input" placeholder="Search...">
+            <button id="search-button">Search</button>
             <select id="sort-filter">
                 <option value="asc_alpha">Alphabetical (A-Z)</option>
                 <option value="desc_alpha">Alphabetical (Z-A)</option>
                 <option value="asc_date">Added Date (Oldest First)</option>
                 <option value="desc_date">Added Date (Newest First)</option>
+                <option value="asc_count">Book Count (Low to High)</option>
+                <option value="desc_count">Book Count (High to Low)</option>
             </select>
         </div>
+
+        <!-- Add New Section button -->
+        <button id="add-section-button" onclick="redirectToSectionAdd()">Add New Section</button>
+
         <section class="section-list">
             <h2>Sections</h2>
             <div class="section-container">
                 {% for section in sections %}
                     <div class="section">
                         <h3>{{ section.name }}</h3>
-                        <p>{{ section.description }}</p>
+                        <p>Description: {{ section.description }}</p>
+                        <p>Date Added: {{ section.date_added }}</p>
                         <p>Number of Books: {{ section.book_count }}</p>
-                     
-<!--     Remove comment to get images of the section                   
-                        {% if section.image %}
-                            <img src="{{ section.image }}" alt="Section Image">
-                        {% endif %}
--->
                         <div class="section-buttons">
-                            <button onclick="editSection({{ section.id }})">Edit Section</button> <!-- Button to edit the section -->
-                            <button onclick="deleteSection({{ section.id }})">Delete Section</button> <!-- Button to delete the section -->
-                            <button onclick="bookList({{ section.id }})">Book List</button> <!-- Button to display books in that section -->
+                            <button onclick="editSection({{ section.id }})">Edit Section</button>
+                            <button onclick="deleteSection({{ section.id }})">Delete Section</button>
+                            <button onclick="bookList({{ section.id }})">Book List</button>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         </section>
-
-        <button id="add-section-button" onclick="redirectToSectionAdd()">Add New Section</button>
-
     </main>
     <footer>
         <p>&copy; 2024 Library Management System</p>
     </footer>
 
     <script>
+
+        $(document).ready(function() {
+            // Function to handle search button click
+            $('#search-button').click(function() {
+                var searchQuery = $('#search-input').val().trim().toLowerCase();
+                filterSections(searchQuery);
+            });
+    
+            // Function to handle sort filter change
+            $('#sort-filter').change(function() {
+                var sortBy = $(this).val();
+                sortSections(sortBy);
+            });
+    
+            // Initial sorting based on default selected option
+            sortSections($('#sort-filter').val());
+    
+            // Function to filter sections based on search query
+            function filterSections(query) {
+                $('.section').each(function() {
+                    var sectionName = $(this).find('h3').text().toLowerCase();
+                    if (sectionName.includes(query)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+    
+            // Function to sort sections based on selected option
+            function sortSections(sortBy) {
+                var sections = $('.section').toArray();
+                sections.sort(function(a, b) {
+                    if (sortBy === 'asc_alpha' || sortBy === 'desc_alpha') {
+                        var textA = $(a).find('h3').text().toUpperCase();
+                        var textB = $(b).find('h3').text().toUpperCase();
+                        return (sortBy === 'asc_alpha') ? (textA < textB ? -1 : (textA > textB ? 1 : 0)) : (textA > textB ? -1 : (textA < textB ? 1 : 0));
+                    } else if (sortBy === 'asc_date' || sortBy === 'desc_date') {
+                        var dateA = new Date($(a).find('p:contains("Date Added:")').text().trim());
+                        var dateB = new Date($(b).find('p:contains("Date Added:")').text().trim());
+                        return (sortBy === 'asc_date') ? (dateA - dateB) : (dateB - dateA);
+                    } else if (sortBy === 'asc_count' || sortBy === 'desc_count') {
+                        var countA = parseInt($(a).find('p:contains("Number of Books:")').text().split(':')[1].trim());
+                        var countB = parseInt($(b).find('p:contains("Number of Books:")').text().split(':')[1].trim());
+                        return (sortBy === 'asc_count') ? (countA - countB) : (countB - countA);
+                    }
+                });
+                $('.section-container').empty().append(sections);
+            }
+        });
+
+
         function editSection(sectionId) {
             // Define editSection functionality here
             window.location.href = "/edit_section/" + sectionId;
@@ -87,8 +137,8 @@
     
         // Function to handle adding a book to a section
         function bookList(sectionId) {
-            window.location.href = "/librarian/books/add?section_id=" + sectionId;
-        }
+            window.location.href = "/librarian/sections/" + sectionId + "/books";
+        }        
 
         function redirectToSectionAdd() {
             // Redirect to section_add.html

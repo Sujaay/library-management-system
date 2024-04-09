@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ section.name }} | Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='display_section_books.css') }}">
+    <link rel ="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('librarian_dashboard') }}" class="dashboard-link">Librarian Dashboard</a></li>
+                <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <h1>{{ section.name }} - Books</h1>
+
+        <!-- Search and Filter Section -->
+        <div class="search-filter">
+            <input type="text" id="search-input" placeholder="Search...">
+            <button id="search-button">Search</button>
+            <select id="sort-filter">
+                <option value="asc_alpha">Title (A-Z)</option>
+                <option value="desc_alpha">Title (Z-A)</option>
+                <option value="asc_date">Date Added (Oldest First)</option>
+                <option value="desc_date">Date Added (Newest First)</option>
+            </select>
+        </div>
+
+        <!-- Form to add a new book -->
+        <a href="{{ url_for('add_book', section_id=section.id) }}">Add New Book</a>
+
+        <!-- Display all books -->
+        <div class="books-container">
+            {% for book in books %}
+                <div class="book-container">
+                    <div class="book-info">
+                        <h3>{{ book.title }}</h3>
+                        <p><strong>Author:</strong> {{ book.author }}</p>
+                        <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+                        <p><strong>Date Added:</strong> {{ book.date_added }}</p>
+                        <!-- Add more details as needed -->
+                    </div>
+                    <div class="book-buttons">
+                        <button onclick="editBook({{ book.id }})">Edit</button>
+                        <button onclick="deleteBook({{ book.id }})">Delete</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Function to handle search button click
+            $('#search-button').click(function() {
+                var searchQuery = $('#search-input').val().trim().toLowerCase();
+                filterBooks(searchQuery);
+            });
+    
+            // Function to handle sort filter change
+            $('#sort-filter').change(function() {
+                var sortBy = $(this).val();
+                sortBooks(sortBy);
+            });
+    
+            // Initial sorting based on default selected option
+            sortBooks($('#sort-filter').val());
+    
+            // Function to filter books based on search query
+            function filterBooks(query) {
+                $('.book-container').each(function() {
+                    var title = $(this).find('h3').text().toLowerCase();
+                    if (title.includes(query)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+    
+            // Function to sort books based on selected option
+            function sortBooks(sortBy) {
+                var books = $('.book-container').toArray();
+                books.sort(function(a, b) {
+                    if (sortBy === 'asc_alpha' || sortBy === 'desc_alpha') {
+                        var textA = $(a).find('h3').text().toUpperCase();
+                        var textB = $(b).find('h3').text().toUpperCase();
+                        return (sortBy === 'asc_alpha') ? (textA < textB ? -1 : (textA > textB ? 1 : 0)) : (textA > textB ? -1 : (textA < textB ? 1 : 0));
+                    } else {
+                        var dateA = new Date($(a).find('.date_added').text().trim());
+                        var dateB = new Date($(b).find('.date_added').text().trim());
+                        return (sortBy === 'asc_date') ? (dateA - dateB) : (dateB - dateA);
+                    }
+                });
+                $('.books-container').empty().append(books);
+            }
+        });
+
+        function editBook(bookId) {
+            // Redirect to edit book page with bookId parameter
+            window.location.href = "/edit_book/" + bookId;
+        }
+
+        function deleteBook(bookId) {
+            // Confirm deletion and make AJAX request to delete book
+            if (confirm("Are you sure you want to delete this book?")) {
+                $.ajax({
+                    url: "/delete_book/" + bookId,
+                    type: "POST",
+                    success: function(response) {
+                        // Reload page after successful deletion
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Error deleting book: " + error);
+                    }
+                });
+            }
+        }
+
+    </script>
+</body>
+</html>

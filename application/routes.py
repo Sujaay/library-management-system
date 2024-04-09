@@ -196,99 +196,99 @@ def delete_section(section_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
-@app.route('/librarian/sections/add', methods=['GET', 'POST'])
-@login_required
-def add_section():
-    if request.method == 'GET':
-        return render_template('librarian/section/add_section.html')
-    elif request.method == 'POST':
-        section_name = request.form.get('section_name')
-        if section_name:
-            new_section = Section(name=section_name)
-            db.session.add(new_section)
-            db.session.commit()
-            return redirect(url_for('librarian_dashboard'))
-        else:
-            return render_template('librarian/section/add_section.html', error='Section name is required')
-
-@app.route('/librarian/sections/<int:section_id>/books')
-@login_required
-def list_books_by_section(section_id):
+@app.route('/librarian/sections/<int:section_id>/books', methods=['GET'])
+def display_section_books(section_id):
     section = Section.query.get_or_404(section_id)
-    books = Book.query.filter_by(section_id=section.id).all()
-    return render_template('librarian/section/books.html', section=section, books=books)
+    books = section.books  # Assuming you have a relationship defined in your Section model
+    return render_template('librarian/section/display_section_books.html', section=section, books=books)
+
+from flask import request, redirect, url_for, flash
+
+# Existing route for rendering the add book form
+@app.route('/add_book/<int:section_id>')
+def add_book(section_id):
+    # Your route logic here
+    return render_template('librarian/book/add_book.html', section_id=section_id)
+
+# New route for adding books to the database
+@app.route('/add_book', methods=['POST'])
+def add_book_to_db():
+    if request.method == 'POST':
+        # Retrieve form data
+        title = request.form.get('title')
+        author = request.form.get('author')
+        isbn = request.form.get('isbn')
+        section_id = request.form.get('section_id')
+        image = request.form.get('image')
+        pdf_link = request.form.get('pdf_link')
+
+        # Validate form data (you can add more validation if needed)
+
+        # Create a new Book object
+        new_book = Book(
+            title=title,
+            author=author,
+            isbn=isbn,
+            section_id=section_id,
+            image=image,
+            pdf_link=pdf_link
+        )
+
+        # Add the new book to the database
+        db.session.add(new_book)
+        db.session.commit()
+
+        # Optionally, you can add a flash message to indicate success
+        flash('Book added successfully!', 'success')
+
+        # Redirect to the librarian dashboard or any other desired page
+        return redirect(url_for('librarian_dashboard'))
+
+    # Handle cases where the request method is not POST (optional)
+    flash('Invalid request method', 'error')
+    return redirect(url_for('librarian_dashboard'))  # Redirect to dashboard or any other page
 
 
-@app.route('/librarian/books/<int:book_id>/edit', methods=['GET', 'POST'])
-@login_required
-def edit_book(book_id):
-    book = Book.query.get_or_404(book_id)
-    sections = Section.query.all()
-    if request.method == 'GET':
-        return render_template('librarian/book/edit.html', book=book, sections=sections)
-    else:
-        title = request.form['title']
-        author = request.form['author']
-        isbn = request.form['isbn']
-        section_id = request.form['section_id']
-        book.title = title
-        book.author = author
-        book.isbn = isbn
-        book.section_id = section_id
-        try:
-            db.session.commit()
-            flash('Book edited successfully!', 'success')
-            return redirect(url_for('list_books_by_section', section_id=book.section_id))
-        except Exception as e:
-            # Handle database errors gracefully
-            flash(f'Error editing book: {e}', 'danger')
-            return render_template('librarian/book/edit.html', book=book, sections=sections)
-
-@app.route('/librarian/books/<int:book_id>/delete', methods=['GET', 'POST'])
-@login_required
+# Route to delete a book
+@app.route('/delete_book/<int:book_id>', methods=['POST'])
 def delete_book(book_id):
-     book = Book.query.get_or_404(book_id)
-     if request.method == 'GET':
-         return render_template('librarian/book/delete.html', book=book)
-     else:
-         try:
-             db.session.delete(book)
-             db.session.commit()
-             flash('Book deleted successfully!', 'success')
-             return redirect(url_for('list_books_by_section', section_id=book.section_id))
-         except Exception as e:
-             # Handle database errors gracefully (e.g., foreign key constraints)
-             flash(f'Error deleting book: {e}', 'danger')
-             return redirect(url_for('list_books_by_section', section_id=book.section_id))
-         
+    book = Book.query.get_or_404(book_id)
+    db.session.delete(book)
+    db.session.commit()
+    return 'Book deleted successfully'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/librarian/statistics')
 @login_required
 def librarian_statistics():
-    # Query to get the count of new books added each day for the last week
     books_data = db.session.query(func.date(Book.date_added), func.count(Book.id)).\
         filter(Book.date_added >= (datetime.now() - timedelta(days=7))).\
         group_by(func.date(Book.date_added)).all()
     
-    # Extracting labels and data for books chart
     books_labels = [str(entry[0]) for entry in books_data]
     books_count = [entry[1] for entry in books_data]
     
-    # Query to get the count of new sections added each day for the last week
     sections_data = db.session.query(func.date(Section.date_added), func.count(Section.id)).\
         filter(Section.date_added >= (datetime.now() - timedelta(days=7))).\
         group_by(func.date(Section.date_added)).all()
     
-    # Extracting labels and data for sections chart
     sections_labels = [str(entry[0]) for entry in sections_data]
     sections_count = [entry[1] for entry in sections_data]
     
-    # Query to get the count of new users registered today
     new_users_count = User.query.filter(func.date(User.date_registered) == date.today()).count()
-    
-    # Query to get the count of users logged in today
-    users_logged_in_today = User.query.filter(func.date(User.last_login) == date.today()).count()
-    
+    users_logged_in_today = User.query.filter(func.date(User.last_login) == date.today()).count()  
     return render_template('librarian/library_statistics.html', 
                            books_labels=books_labels, 
                            books_data=books_count, 

@@ -4,13 +4,9 @@ header {
     padding: 20px;
 }
 
-header h1 {
-    margin: 0;
-    font-size: 24px;
-}
-
 nav ul {
     list-style-type: none;
+    margin: 0;
     padding: 0;
 }
 
@@ -22,4 +18,12 @@ nav ul li {
 nav ul li a {
     color: #fff;
     text-decoration: none;
+}
+
+nav ul li a.dashboard-link {
+    font-weight: bold;
+}
+
+.navbar-right {
+    float: right;
 }
