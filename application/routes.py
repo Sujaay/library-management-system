@@ -13,6 +13,11 @@ def allowed_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -22,10 +27,6 @@ def uploaded_file(filename):
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# Initialize Flask-Login
-login_manager = LoginManager()
-login_manager.login_view = 'login'
-login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -64,8 +65,6 @@ def register():
         db.session.commit()
         flash('Registration successful. Please log in.', 'success')
         return redirect(url_for('login'))
-
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -295,14 +294,12 @@ def delete_section(section_id):
         return jsonify({'error': str(e)}), 500
 
 
+# Route for displaying books in a section
 @app.route('/librarian/sections/<int:section_id>/books', methods=['GET'])
 def display_section_books(section_id):
     section = Section.query.get_or_404(section_id)
-    books = section.books  # Assuming you have a relationship defined in your Section model
+    books = section.books
     return render_template('librarian/section/display_section_books.html', section=section, books=books)
-
-
-
 
 
 # Existing route for rendering the add book form
@@ -352,20 +349,15 @@ def add_book(section_id):
         else:
             pdf_path = None  # Set to None if PDF upload fails
 
-        # Process form data and save to database
-        # Replace this with your actual database logic
-        book = Book(title=title, author=author, isbn=isbn, section_id=section_id, image=book_image_path, pdf=pdf_path)
+        book = Book(title=title, author=author, isbn=isbn, section_id=section_id, image=book_image_path, pdf_link=pdf_path)
         db.session.add(book)
         db.session.commit()
 
         flash('Book added successfully!', 'success')
-        return render_template('librarian/section/display_section_books.html')
+        return redirect(url_for('display_section_books', section_id=section_id))
 
     else:
         return render_template('librarian/book/add_book.html', section_id=section_id)
-
-
-
 
 # Route to delete a book
 @app.route('/delete_book/<int:book_id>', methods=['POST'])
@@ -374,18 +366,6 @@ def delete_book(book_id):
     db.session.delete(book)
     db.session.commit()
     return 'Book deleted successfully'
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 @app.route('/librarian/statistics')
@@ -414,10 +394,3 @@ def librarian_statistics():
                            sections_data=sections_count, 
                            new_users_count=new_users_count, 
                            users_logged_in_today=users_logged_in_today)
-
-from application.models import Section
-
-@app.route('/add_book', methods=['GET'])
-@login_required
-def add_book_page():
-    return render_template('librarian/book/add.html')
