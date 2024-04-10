@@ -1,10 +1,26 @@
-from flask import render_template, request, redirect, url_for, session, request, flash, jsonify
+from flask import render_template, request, redirect, url_for, session, request, flash, jsonify, send_from_directory
 from application import app, db
 from application.models import *
 from flask_login import login_required, current_user, login_user, logout_user, LoginManager
 from datetime import datetime, date, timedelta
 from sqlalchemy import func
+import os
+from werkzeug.utils import secure_filename
+import secrets  # For generating random filenames
 
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+    # Define the upload folder
+    UPLOAD_FOLDER = 'assets'
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # Initialize Flask-Login
 login_manager = LoginManager()
@@ -95,6 +111,9 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+
+# USER DASHBOARD ROUTES
+
 @app.route('/user_dashboard')
 @login_required
 def user_dashboard():
@@ -168,17 +187,96 @@ def librarian_dashboard():
     current_date = datetime.utcnow()  # Example for current date
     return render_template('librarian/librarian_dashboard.html', sections=sections, current_date=current_date)
 
+# Route for adding a new section
+@app.route('/librarian/add_section', methods=['GET', 'POST'])
+@login_required
+def add_section():
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+    # Define the upload folder
+    UPLOAD_FOLDER = 'assets'
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    if request.method == 'POST':
+        section_name = request.form.get('section_name')
+        section_description = request.form.get('section_description')
+        # Handle file upload
+        if 'section_image' in request.files:
+            file = request.files['section_image']
+            if file and allowed_file(file.filename):
+                import uuid  # Import for generating unique ID
+
+                # Generate unique filename with section name
+                extension = os.path.splitext(file.filename)[1]
+                unique_id = str(uuid.uuid4())[:8]  # Generate 8 character unique ID
+                filename = f"{section_name}_{unique_id}{extension}"
+                filename = secure_filename(filename)
+
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+                # Update section_image with saved filename
+                section_image = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+        section = Section(name=section_name, description=section_description,  image=section_image)
+        db.session.add(section)
+        db.session.commit()
+        flash('Section added successfully!', 'success')
+        return redirect(url_for('librarian_dashboard'))
+
+    return render_template('librarian/section/add_section.html')
+
+# Route for editing a section
 @app.route('/edit_section/<int:section_id>', methods=['GET', 'POST'])
 def edit_section(section_id):
-    # Assume logic for editing a section here
+    section = Section.query.get_or_404(section_id)
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+    # Define the upload folder
+    UPLOAD_FOLDER = 'assets'
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
     if request.method == 'POST':
-        # Handle form submission to update section details
-        # Update the section in the database
+        section_name = request.form.get('section_name')
+        section_description = request.form.get('section_description')  # Get description from form
+
+        # Update only modified attributes
+        if section_name:
+            section.name = section_name
+        if section_description:
+            section.description = section_description
+
+        # Handle file upload (optional, modify if needed)
+        if 'section_image' in request.files:
+            file = request.files['section_image']
+            if file and allowed_file(file.filename):
+                import uuid
+
+                # Generate unique filename with extension
+                extension = os.path.splitext(file.filename)[1]
+                unique_id = str(uuid.uuid4())[:8]  # Generate 8 character unique ID
+                filename = f"{section_name}_{unique_id}{extension}"
+                filename = secure_filename(filename)
+
+                # Delete existing image (if present)
+                old_image_path = section.image  
+
+                if old_image_path:  # Check if image exists
+                    try:
+                        os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                    except FileNotFoundError:
+                        pass  # Ignore if file not found
+
+                # Save uploaded file
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+                # Update section image with saved filename (if upload successful)
+                section.image = url_for('uploaded_file', filename=filename)
+
+        db.session.commit()
         flash('Section updated successfully!', 'success')
         return redirect(url_for('librarian_dashboard'))
-    else:
-        # Render the edit section form
-        return render_template('librarian/section/edit_section.html', section_id=section_id)
+
+    return render_template('librarian/section/edit_section.html', section=section)
+
 
 # Route for deleting a section
 @app.route('/librarian/sections/<int:section_id>/delete', methods=['POST'])
@@ -196,57 +294,77 @@ def delete_section(section_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 @app.route('/librarian/sections/<int:section_id>/books', methods=['GET'])
 def display_section_books(section_id):
     section = Section.query.get_or_404(section_id)
     books = section.books  # Assuming you have a relationship defined in your Section model
     return render_template('librarian/section/display_section_books.html', section=section, books=books)
 
-from flask import request, redirect, url_for, flash
+
+
+
 
 # Existing route for rendering the add book form
-@app.route('/add_book/<int:section_id>')
+@app.route('/add_book/<int:section_id>', methods=['GET', 'POST'])
 def add_book(section_id):
-    # Your route logic here
-    return render_template('librarian/book/add_book.html', section_id=section_id)
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# New route for adding books to the database
-@app.route('/add_book', methods=['POST'])
-def add_book_to_db():
+    # Define the upload folder
+    UPLOAD_FOLDER = 'assets'
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    
     if request.method == 'POST':
-        # Retrieve form data
-        title = request.form.get('title')
-        author = request.form.get('author')
-        isbn = request.form.get('isbn')
-        section_id = request.form.get('section_id')
-        image = request.form.get('image')
-        pdf_link = request.form.get('pdf_link')
+        # Get form data
+        title = request.form['title']
+        author = request.form['author']
+        isbn = request.form['isbn']
 
-        # Validate form data (you can add more validation if needed)
+        # Handle file uploads (improved logic with unique filenames)
+        book_image = request.files['book_image']
+        pdf_file = request.files['pdf_file']
 
-        # Create a new Book object
-        new_book = Book(
-            title=title,
-            author=author,
-            isbn=isbn,
-            section_id=section_id,
-            image=image,
-            pdf_link=pdf_link
-        )
+        if book_image and allowed_file(book_image.filename):
+            import uuid
 
-        # Add the new book to the database
-        db.session.add(new_book)
+            # Generate unique filename with extension
+            extension = os.path.splitext(book_image.filename)[1]
+            unique_id = str(uuid.uuid4())[:8]  # Generate 8 character unique ID
+            filename = f"book_image_{unique_id}{extension}"
+            filename = secure_filename(filename)
+
+            # Configure book image path (assuming UPLOAD_FOLDER is set)
+            book_image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'books', 'images', filename)
+            book_image.save(book_image_path)
+        else:
+            book_image_path = None  # Set to None if image upload fails
+
+        if pdf_file and allowed_file(pdf_file.filename):
+            # Generate unique filename with extension
+            extension = os.path.splitext(pdf_file.filename)[1]
+            unique_id = str(uuid.uuid4())[:8]  # Generate 8 character unique ID
+            filename = f"book_pdf_{unique_id}{extension}"
+            filename = secure_filename(filename)
+
+            # Configure PDF path (assuming UPLOAD_FOLDER is set)
+            pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], 'books', 'pdfs', filename)
+            pdf_file.save(pdf_path)
+        else:
+            pdf_path = None  # Set to None if PDF upload fails
+
+        # Process form data and save to database
+        # Replace this with your actual database logic
+        book = Book(title=title, author=author, isbn=isbn, section_id=section_id, image=book_image_path, pdf=pdf_path)
+        db.session.add(book)
         db.session.commit()
 
-        # Optionally, you can add a flash message to indicate success
         flash('Book added successfully!', 'success')
+        return render_template('librarian/section/display_section_books.html')
 
-        # Redirect to the librarian dashboard or any other desired page
-        return redirect(url_for('librarian_dashboard'))
+    else:
+        return render_template('librarian/book/add_book.html', section_id=section_id)
 
-    # Handle cases where the request method is not POST (optional)
-    flash('Invalid request method', 'error')
-    return redirect(url_for('librarian_dashboard'))  # Redirect to dashboard or any other page
+
 
 
 # Route to delete a book

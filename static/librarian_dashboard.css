@@ -62,6 +62,50 @@ main {
     background-color: #0056b3;
 }
 
+.section {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.section .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.section .section-image {
+    width: 50px; /* Adjust as needed */
+    height: 50px; /* Adjust as needed */
+    overflow: hidden;
+    border-radius: 50%; /* Ensures the image is displayed as a circle */
+}
+
+.section .section-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 50%;
+}
+
+.section-details p {
+    margin: 5px 0;
+}
+
+.section-buttons button {
+    margin-right: 5px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.section-buttons button:hover {
+    background-color: #0056b3;
+}
+
 .section-list {
     background-color: #fff;
     padding: 20px;
@@ -110,16 +154,4 @@ main {
 
 .section-buttons button:hover {
     background-color: #0056b3;
-}
-
-footer {
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    padding: 10px 0;
-    margin-top: auto; /* Push footer to the bottom */
-}
-
-footer p {
-    margin: 0;
 }

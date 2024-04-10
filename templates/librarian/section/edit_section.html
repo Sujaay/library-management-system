@@ -1,28 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Section</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='edit_section.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Section</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='edit_section.css') }}">
 </head>
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('librarian_dashboard') }}">Librarian Dashboard</a></li>
-                <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <h1>Edit Section</h1>
-    <form action="{{ url_for('edit_section', section_id=section_id) }}" method="post">
-        <label for="section_name">Section Name:</label>
-        <input type="text" name="section_name" id="section_name" value="{{ section.name }}" required><br>
-        <label for="section_image">Section Image URL:</label>
-        <input type="text" name="section_image" id="section_image" value="{{ section.image }}"><br>
-        <button type="submit">Update Section</button>
-    </form>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('librarian_dashboard') }}">Librarian Dashboard</a></li>
+        <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+        <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <h1>Edit Section</h1>
+  <form action="{{ url_for('edit_section', section_id=section.id) }}" method="post" enctype="multipart/form-data">
+    <label for="section_name">Section Name:</label>
+    <input type="text" name="section_name" id="section_name" value="{{ section.name }}" required><br>
+    <label for="section_description">Section Description:</label>
+    <textarea name="section_description" id="section_description">{{ section.description }}</textarea><br>
+    <label for="section_image">Section Image:</label>
+    <input type="file" name="section_image" id="section_image"><br>
+    <button type="submit">Update Section</button>
+  </form>
 </body>
 </html>

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Section</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='add_section.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
 </head>
 <body>
@@ -19,11 +20,13 @@
     </header>
     
     <h1>Add New Section</h1>
-    <form action="{{ url_for('add_section') }}" method="post">
+    <form action="{{ url_for('add_section') }}" method="post" enctype="multipart/form-data">
         <label for="section_name">Section Name:</label>
         <input type="text" name="section_name" id="section_name" required><br>
-        <label for="section_image">Section Image URL:</label>
-        <input type="text" name="section_image" id="section_image"><br>
+        <label for="section_description">Description:</label>
+        <textarea name="section_description" id="section_description"></textarea><br>
+        <label for="section_image">Section Image:</label>
+        <input type="file" name="section_image" id="section_image"><br>
         <button type="submit">Add Section</button>
     </form>
     <footer>

@@ -6,6 +6,8 @@
     <title>Librarian Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='librarian_dashboard.css') }}">
     <link rel ="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <link rel ="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -41,10 +43,21 @@
             <div class="section-container">
                 {% for section in sections %}
                     <div class="section">
-                        <h3>{{ section.name }}</h3>
-                        <p>Description: {{ section.description }}</p>
-                        <p>Date Added: {{ section.date_added }}</p>
-                        <p>Number of Books: {{ section.book_count }}</p>
+                        <div class="section-header">
+                            <h3>{{ section.name }}</h3>
+                            <div class="section-image">
+                                <!--
+                                {% if section.image %}
+                                    <img src="{{ section.image }}" alt="Section Image">
+                                {% endif %}
+                                -->
+                            </div>
+                        </div>
+                        <div class="section-details">
+                            <p>Description: {{ section.description }}</p>
+                            <p>Date Added: {{ section.date_added }}</p>
+                            <p>Number of Books: {{ section.book_count }}</p>
+                        </div>
                         <div class="section-buttons">
                             <button onclick="editSection({{ section.id }})">Edit Section</button>
                             <button onclick="deleteSection({{ section.id }})">Delete Section</button>
@@ -54,6 +67,7 @@
                 {% endfor %}
             </div>
         </section>
+        
     </main>
     <footer>
         <p>&copy; 2024 Library Management System</p>

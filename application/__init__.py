@@ -3,6 +3,7 @@ from application.database import db
 from application.models import User
 from flask_login import LoginManager
 
+
 app = Flask(__name__, template_folder="../templates", static_folder='../static')
 app.config['SECRET_KEY'] = 'aush33rf4r2gflashfaoi' 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite3'
