@@ -1,0 +1,29 @@
+/* Add your CSS styles for view_sections here */
+.sections-list {
+    padding: 20px;
+}
+
+.search-filter {
+    margin-bottom: 20px;
+}
+
+.sections-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.section-container {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-container h3 {
+    margin-bottom: 10px;
+}
+
+.section-container p {
+    color: #666;
+}

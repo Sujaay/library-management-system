@@ -1,0 +1,39 @@
+<!-- templates/user/request_return_books.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Request and Return Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Library - Request and Return Books</h1>
+        <!-- Add navigation links here -->
+    </header>
+    <section class="request-return">
+        <h2>Request Books</h2>
+        <form action="{{ url_for('request_book') }}" method="post">
+            <label for="book_id">Select Book:</label>
+            <select name="book_id" id="book_id">
+                {% for book in available_books %}
+                <option value="{{ book.id }}">{{ book.title }} by {{ book.author }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Request</button>
+        </form>
+        <h2>Return Books</h2>
+        <form action="{{ url_for('return_book') }}" method="post">
+            <label for="book_id">Select Book:</label>
+            <select name="book_id" id="book_id">
+                {% for book in borrowed_books %}
+                <option value="{{ book.id }}">{{ book.title }} by {{ book.author }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Return</button>
+        </form>
+    </section>
+</body>
+</html>

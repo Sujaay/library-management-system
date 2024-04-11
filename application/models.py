@@ -1,8 +1,9 @@
-import bcrypt
 from application.database import db
 from flask_login import UserMixin
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
+from datetime import datetime, timedelta
+import bcrypt
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,6 +16,9 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String(20), nullable=False, default="user")
     date_registered = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     last_login = db.Column(db.DateTime, nullable=True)
+
+    requests = relationship('Request', back_populates='user')
+    feedbacks = relationship('Feedback', back_populates='user')
 
     def __init__(self, name, email, phone, password, address=None, gender=None, role='user'):
         self.name = name
@@ -84,8 +88,10 @@ class Book(db.Model):
     date_added = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     image = db.Column(db.String(255), nullable=True)  # Image URL or file path
     pdf_link = db.Column(db.String(255), nullable=True)  # PDF link for the book
-    
+    price = db.Column(db.Float, nullable=True)  # Price of the e-book
+
     section = relationship('Section', back_populates='books')
+    requests = relationship('Request', back_populates='book')
 
     def __repr__(self):
         return f'<Book {self.title}>'
@@ -112,3 +118,28 @@ class Section(db.Model):
     def book_count(self):
         # Calculate the number of books associated with the section
         return len(self.books)
+
+class Request(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    request_date = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    return_date = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), nullable=False, default='requested')  # Request status: requested, approved, returned
+
+    user = relationship('User', back_populates='requests')
+    book = relationship('Book', back_populates='requests')
+
+class Feedback(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    comment = db.Column(db.Text, nullable=True)
+    date_added = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+
+    user = db.relationship('User', backref=db.backref('user_feedbacks', overlaps='feedbacks'))
+    book = db.relationship('Book', backref='feedbacks')
+
+    def __repr__(self):
+        return f'<Feedback {self.id}>'

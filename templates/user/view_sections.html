@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Sections and Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='user/view_sections.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Library - Sections and Books</h1>
+        <!-- Add navigation links here -->
+    </header>
+    <section class="sections-list">
+        <div class="search-filter">
+            <input type="text" id="search-input" placeholder="Search sections...">
+        </div>
+        <h2>Sections</h2>
+        <div class="sections-container">
+            {% for section in sections %}
+            <div class="section-container">
+                <h3><a href="{{ url_for('view_books', section_id=section.id) }}">{{ section.name }}</a></h3>
+                <p>{{ section.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const sectionContainers = document.querySelectorAll('.section-container');
+
+        searchInput.addEventListener('input', filterSections);
+
+        function filterSections() {
+            const searchText = searchInput.value.toLowerCase();
+
+            sectionContainers.forEach(container => {
+                const sectionName = container.querySelector('h3').innerText.toLowerCase();
+                const sectionDescription = container.querySelector('p').innerText.toLowerCase();
+
+                if (sectionName.includes(searchText) || sectionDescription.includes(searchText)) {
+                    container.style.display = 'block';
+                } else {
+                    container.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

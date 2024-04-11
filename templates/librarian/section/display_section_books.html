@@ -95,8 +95,8 @@
                         var textB = $(b).find('h3').text().toUpperCase();
                         return (sortBy === 'asc_alpha') ? (textA < textB ? -1 : (textA > textB ? 1 : 0)) : (textA > textB ? -1 : (textA < textB ? 1 : 0));
                     } else {
-                        var dateA = new Date($(a).find('.date_added').text().trim());
-                        var dateB = new Date($(b).find('.date_added').text().trim());
+                        var dateA = new Date($(a).find('p:contains("Date Added:")').text().trim());
+                        var dateB = new Date($(b).find('p:contains("Date Added:")').text().trim());
                         return (sortBy === 'asc_date') ? (dateA - dateB) : (dateB - dateA);
                     }
                 });

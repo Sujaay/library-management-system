@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='user/user_dashboard.css') }}">
+</head>
+<body>
+    <header>
+        <h1>User Dashboard</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('view_sections') }}">View Sections and Books</a></li>
+            <li><a href="{{ url_for('request_return_books') }}">Request and Return Books</a></li>
+            <li><a href="{{ url_for('give_feedback') }}">Give Feedback</a></li>
+            <li><a href="{{ url_for('download_ebook', book_id=1) }}">Download E-book</a></li>
+            <!-- Add more links as needed -->
+        </ul>
+    </nav>
+</body>
+</html>

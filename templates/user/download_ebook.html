@@ -1,0 +1,24 @@
+<!-- templates/user/download_ebook.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library - Download E-book</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Library - Download E-book</h1>
+        <!-- Add navigation links here -->
+    </header>
+    <section class="download-ebook">
+        <h2>Download "{{ book.title }}"</h2>
+        <p>Price: ${{ book.price }}</p>
+        <form action="{{ url_for('purchase_ebook', book_id=book.id) }}" method="post">
+            <button type="submit">Purchase and Download</button>
+        </form>
+    </section>
+</body>
+</html>

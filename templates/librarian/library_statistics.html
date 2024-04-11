@@ -8,18 +8,18 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="{{ url_for('static', filename='library_statistics.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
 </head>
 <body>
     <header>
-        <h1>Welcome to the Statistics Dashboard</h1>
         <nav>
             <ul>
-                <li><a href="{{ url_for('add_book') }}">Add New Book</a></li>
-                <li><a href="{{ url_for('add_section') }}">Manage Sections</a></li>
-                <li><a href="{{ url_for('logout') }}">Logout</a></li>
-                <li><a href="{{ url_for('librarian_statistics') }}">Library Statistics</a></li>
-                <!-- Add more navigation links as needed -->
+                <li><a href="{{ url_for('librarian_dashboard') }}" class="dashboard-link">Librarian Dashboard</a></li>
+                <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
             </ul>
         </nav>
     </header>
@@ -163,4 +163,7 @@
         });
     </script>
 </body>
+<footer>
+    <p>&copy; 2024 Library Management System</p>
+</footer>
 </html>

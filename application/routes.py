@@ -82,7 +82,7 @@ def login():
                 user.last_login = datetime.now()  # Set the last_login attribute
                 db.session.commit()  # Commit changes to the database
                 login_user(user)
-                flash('Login successful!', 'success')
+                print('Login successful!', 'success')
                 return redirect(url_for('user_dashboard'))
             else:
                 flash('Invalid email or password. Please try again.', 'danger')
@@ -111,70 +111,70 @@ def logout():
     return redirect(url_for('login'))
 
 
-# USER DASHBOARD ROUTES
 
+# Core - General User functionalities
+
+# User dashboard route
 @app.route('/user_dashboard')
-@login_required
 def user_dashboard():
-    # Ensure user_id is in session before fetching user details
-    if current_user.is_authenticated:  # Check if the user is authenticated
-        name = current_user.name
-        email = current_user.email
-        phone = current_user.phone
-        address = current_user.address
-        return render_template('user_dashboard.html', name=name, email=email, phone=phone, address=address)
+    return render_template('user/user_dashboard.html')
+
+# View sections and books route
+@app.route('/view_sections')
+def view_sections():
+    # Fetch all sections from the database
+    sections = Section.query.all()
+    
+    # Render the view_sections template with the sections data
+    return render_template('user/view_sections.html', sections=sections)
+
+@app.route('/view_books/<int:section_id>')
+def view_books(section_id):
+    # Fetch the section based on the provided section_id
+    section = Section.query.get(section_id)
+
+    # If the section is not found, redirect to the view_sections page
+    if not section:
+        return redirect(url_for('view_sections'))
+
+    # Fetch all books associated with the section
+    books = section.books
+
+    # Render the view_books template with the section and books data
+    return render_template('user/view_books.html', section=section, books=books)
+# Request and return books route
+@app.route('/request_return_books')
+def request_return_books():
+    # Logic to fetch available and borrowed books
+    available_books = Book.query.filter_by(borrowed=False).all()
+    borrowed_books = Book.query.filter_by(borrowed=True).all()
+    return render_template('user/request_return_books.html', available_books=available_books, borrowed_books=borrowed_books)
+
+# Give feedback route
+@app.route('/give_feedback')
+def give_feedback():
+    # Logic to fetch a book for feedback
+    book = Book.query.first()  # Example: Fetch the first book for feedback
+    return render_template('user/give_feedback.html', book=book)
+
+# Download e-book route
+@app.route('/download_ebook/<int:book_id>')
+def download_ebook(book_id):
+    book = Book.query.get_or_404(book_id)
+    # Logic to check if user has access to download the e-book
+    if user_has_access_to_download_book():  # You need to implement this logic
+        # Logic to initiate download of e-book
+        return redirect(book.pdf_link)  # Redirect user to download link
     else:
-        return redirect(url_for('login'))  # Redirect to login if user is not authenticated
+        flash("You do not have access to download this e-book.", "warning")
+        return redirect(url_for('user_dashboard'))
 
+# Helper function to check if user has access to download book
+def user_has_access_to_download_book():
+    # Add your logic here to check if the user has access to download the e-book
+    return True  # Example: Always return True for demonstration purposes
 
-@app.route('/user_profile', methods=['GET', 'POST'])
-@login_required
-def user_profile():
-    # Fetch user details from current_user
-    user = current_user
-    name = user.name
-    email = user.email
-    phone = user.phone
-    address = user.address
-    return render_template('user_profile.html', name=name, email=email, phone=phone, address=address)
-
-@app.route('/user_my_books')
-@login_required
-def user_my_books():
-    user_books = Book.query.filter_by(user_id=current_user.id).all()
-    return render_template('user_my_books.html', user_books=user_books)
-
-@app.route('/user_account_settings')
-@login_required
-def user_account_settings():
-    # Add logic here to fetch user's account settings
-    return render_template('user_account_settings.html')
-
-@app.route('/update_account_settings', methods=['POST'])
-@login_required
-def update_account_settings():
-    if request.method == 'POST':
-        # Get form data
-        new_address = request.form.get('new_address')
-        new_phone = request.form.get('new_phone')
-        new_password = request.form.get('new_password')
-
-        # Update user information if data is provided
-        if new_address:
-            current_user.update_address(new_address)
-        if new_phone:
-            current_user.update_phone(new_phone)
-        if new_password:
-            current_user.update_password(new_password)
-
-        # Redirect to user account settings page or wherever appropriate
-        return redirect(url_for('user_account_settings'))
-
-@app.route('/user_browse_sections')
-@login_required
-def user_browse_sections():
-    # Add logic here to browse different sections of the library
-    return render_template('user_browse_sections.html')
+# Add more routes and logic as needed
 
 
 # LIBRARIAN ROUTES
