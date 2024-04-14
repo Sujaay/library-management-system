@@ -39,11 +39,9 @@
                 <div class="book-info">
                     <h3>{{ book.title }}</h3>
                     <p><strong>Author:</strong> {{ book.author }}</p>
-                    <!--
                     {% if book.image %}
                     <img src="{{ book.image }}" alt="Book Cover" class="book-image">
                     {% endif %}
-                    -->
                     <p><strong>ISBN:</strong> {{ book.isbn }}</p>
                     <p><strong>Date Added:</strong> {{ book.date_added.strftime('%Y-%m-%d') }}</p>
                     {% if book.price %}

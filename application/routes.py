@@ -378,6 +378,41 @@ def delete_book(book_id):
     return 'Book deleted successfully'
 
 
+@app.route('/librarian/book_requests')
+def book_requests():
+    # Fetch book requests from the database
+    requests = Request.query.all()
+    return render_template('librarian/book_requests.html', requests=requests)
+
+@app.route('/librarian/book_requests/<int:request_id>')
+def view_request(request_id):
+    # Fetch the request details from the database
+    request = Request.query.get_or_404(request_id)
+    return render_template('librarian/view_request.html', request=request)
+
+@app.route('/librarian/book_requests/<int:request_id>/accept', methods=['POST'])
+def accept_request(request_id):
+    # Fetch the request from the database
+    request = Request.query.get_or_404(request_id)
+    # Perform actions to grant access to the book (e.g., update database)
+    # Redirect back to the book requests page
+    return redirect(url_for('book_requests'))
+
+@app.route('/librarian/book_requests/<int:request_id>/reject', methods=['POST'])
+def reject_request(request_id):
+    # Fetch the request from the database
+    request = Request.query.get_or_404(request_id)
+    # Perform actions to reject the request (e.g., delete from database)
+    # Redirect back to the book requests page
+    return redirect(url_for('book_requests'))
+
+@app.route('/librarian/view_requested_book/<int:book_id>')
+def view_requested_book(book_id):
+    # Fetch the book details from the database
+    book = Book.query.get_or_404(book_id)
+    return render_template('librarian/view_requested_book.html', book=book)
+
+
 @app.route('/librarian/statistics')
 @login_required
 def librarian_statistics():

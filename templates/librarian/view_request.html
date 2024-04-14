@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Request</title>
+</head>
+<body>
+    <h1>Request Details</h1>
+    <p><strong>Username:</strong> {{ request.user.username }}</p>
+    <p><strong>Book Title:</strong> {{ request.book.title }}</p>
+    <p><strong>Days Requested:</strong> {{ request.days_requested }}</p>
+    <p><strong>Book Section:</strong> {{ request.book.section.name }}</p>
+    <button onclick="acceptRequest({{ request.id }})">Accept</button>
+    <button onclick="rejectRequest({{ request.id }})">Reject</button>
+    <button onclick="viewRequestedBook({{ request.book.id }})">View Book</button>
+</body>
+</html>

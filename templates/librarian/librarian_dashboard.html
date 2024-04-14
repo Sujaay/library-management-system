@@ -37,6 +37,7 @@
 
         <!-- Add New Section button -->
         <button id="add-section-button" onclick="redirectToSectionAdd()">Add New Section</button>
+        <button id="request-button" onclick="redirectToRequest()">View Requests</button>
 
         <section class="section-list">
             <h2>Sections</h2>
@@ -155,6 +156,10 @@
         function redirectToSectionAdd() {
             // Redirect to section_add.html
             window.location.href = "{{ url_for('add_section') }}";
+        }
+
+        function redirectToRequest(){
+            window.location.href = "{{ url_for('book_requests') }}";
         }
     </script>
 </body>
