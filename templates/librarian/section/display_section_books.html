@@ -46,7 +46,10 @@
                         <p><strong>Author:</strong> {{ book.author }}</p>
                         <p><strong>ISBN:</strong> {{ book.isbn }}</p>
                         <p><strong>Date Added:</strong> {{ book.date_added }}</p>
-                        <!-- Add more details as needed -->
+                        <p><strong>Price: </strong>Rs. {{ book.price }}</p>
+                    </div>
+                    <div class="book-image">
+                        <img src="{{ url_for('static', filename=book.image) }}" alt="{{ book.title }}">
                     </div>
                     <div class="book-buttons">
                         <button onclick="editBook({{ book.id }})">Edit</button>
@@ -54,7 +57,7 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
+        </div>        
     </div>
 
     <script>

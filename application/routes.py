@@ -268,7 +268,7 @@ def edit_section(section_id):
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
                 # Update section image with saved filename (if upload successful)
-                section.image = url_for('uploaded_file', filename=filename)
+                section.image = url_for('static', filename=filename)
 
         db.session.commit()
         flash('Section updated successfully!', 'success')
@@ -303,27 +303,36 @@ def display_section_books(section_id):
 
 
 # Existing route for rendering the add book form
+from flask import request, render_template, redirect, url_for, flash
+from werkzeug.utils import secure_filename
+import os
+import uuid
+
+# Update the allowed file extensions
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Define the upload folder
+UPLOAD_FOLDER = 'assets'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Function to check if file extension is allowed
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/add_book/<int:section_id>', methods=['GET', 'POST'])
 def add_book(section_id):
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-    # Define the upload folder
-    UPLOAD_FOLDER = 'assets'
-    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-    
     if request.method == 'POST':
         # Get form data
         title = request.form['title']
         author = request.form['author']
         isbn = request.form['isbn']
+        price = request.form['price']
 
         # Handle file uploads (improved logic with unique filenames)
         book_image = request.files['book_image']
         pdf_file = request.files['pdf_file']
 
         if book_image and allowed_file(book_image.filename):
-            import uuid
-
             # Generate unique filename with extension
             extension = os.path.splitext(book_image.filename)[1]
             unique_id = str(uuid.uuid4())[:8]  # Generate 8 character unique ID
@@ -349,7 +358,7 @@ def add_book(section_id):
         else:
             pdf_path = None  # Set to None if PDF upload fails
 
-        book = Book(title=title, author=author, isbn=isbn, section_id=section_id, image=book_image_path, pdf_link=pdf_path)
+        book = Book(title=title, author=author, isbn=isbn, price=price, section_id=section_id, image=book_image_path, pdf_link=pdf_path)
         db.session.add(book)
         db.session.commit()
 
@@ -358,6 +367,7 @@ def add_book(section_id):
 
     else:
         return render_template('librarian/book/add_book.html', section_id=section_id)
+
 
 # Route to delete a book
 @app.route('/delete_book/<int:book_id>', methods=['POST'])
