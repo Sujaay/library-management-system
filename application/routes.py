@@ -416,7 +416,6 @@ def book_requests():
 
 @app.route('/librarian/view_requested_book/<int:book_id>')
 def view_requested_book(book_id):
-    # Fetch the book details from the database
     book = Book.query.get_or_404(book_id)
     return render_template('librarian/view_requested_book.html', book=book)
 
@@ -424,9 +423,7 @@ def view_requested_book(book_id):
 @app.route('/accept_request/<int:request_id>', methods=['POST'])
 def accept_request(request_id):
     request = Request.query.get_or_404(request_id)
-    # Perform accept action here (e.g., update request status)
     request.status = 'approved'
-    # Add any additional logic here (e.g., send notification to user)
     flash('Request approved successfully!', 'success')
     return redirect(url_for('book_requests'))
 
@@ -434,9 +431,7 @@ def accept_request(request_id):
 @app.route('/reject_request/<int:request_id>', methods=['POST'])
 def reject_request(request_id):
     request = Request.query.get_or_404(request_id)
-    # Perform reject action here (e.g., update request status)
     request.status = 'rejected'
-    # Add any additional logic here (e.g., send notification to user)
     flash('Request rejected successfully!', 'success')
     return redirect(url_for('book_requests'))
 
@@ -445,6 +440,7 @@ def reject_request(request_id):
 def view_request(request_id):
     request = Request.query.get_or_404(request_id)
     return render_template('request_details.html', request=request)
+
 
 
 @app.route('/librarian/statistics')
