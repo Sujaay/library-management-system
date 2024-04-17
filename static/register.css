@@ -1,5 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Arial, sans-serif;
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
@@ -7,15 +7,20 @@ body {
 
 form {
     max-width: 400px;
-    margin: 20px auto;
-    padding: 20px;
+    margin: 40px auto;
+    padding: 30px;
     background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease-in-out;
 }
 
 form label {
-    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
 }
 
 form input[type="text"],
@@ -24,11 +29,13 @@ form input[type="password"],
 form input[type="date"],
 form select {
     width: 100%;
-    padding: 8px;
-    margin: 6px 0;
+    padding: 12px;
+    margin-top: 6px;
+    margin-bottom: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+    transition: border-color 0.3s ease;
 }
 
 form input[type="radio"] {
@@ -40,10 +47,11 @@ form button {
     background-color: #4CAF50;
     color: white;
     padding: 14px 20px;
-    margin: 8px 0;
+    margin-top: 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
 }
 
 form button:hover {
@@ -51,24 +59,36 @@ form button:hover {
 }
 
 form select {
-    width: 100%;
-    padding: 8px;
-    margin: 6px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
     background-color: #f8f8f8;
 }
 
-/* Optional: Add styles for form validation/error messages */
+/* Improving visual feedback for invalid inputs */
 form input:invalid {
-    border-color: #ff0000;
+    border-color: #e63946;
+}
+
+form input:invalid:focus {
+    border-color: #d90429;
+    box-shadow: 0 0 0 2px rgba(233, 57, 70, 0.4);
 }
 
 form input[type="radio"]:invalid + label::after {
-    content: 'Please select a gender';
-    color: #ff0000;
+    content: ' (required)';
+    color: #e63946;
     font-size: 12px;
-    display: block;
-    margin-top: 4px;
+}
+
+/* Adding subtle focus styles */
+form input:focus, form select:focus {
+    border-color: #0056b3;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 86, 179, 0.25);
+}
+
+/* Responsive design adjustments */
+@media (max-width: 600px) {
+    form {
+        padding: 20px;
+        margin: 20px;
+    }
 }
