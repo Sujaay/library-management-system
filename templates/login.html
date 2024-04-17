@@ -7,18 +7,20 @@
     <title>Login | Library Management System</title>
 </head>
 <body>
-    <form action="/login" method="post">
-        <label for="email">Email: </label>
-        <input type="email" name="email" id="email">
-        <label for="password">Password: </label>
-        <input type="password" name="password" id="password">
-        <label for="role">Role: </label>
-        <select name="role" id="role">
-            <option value="user">User</option>
-            <option value="librarian">Librarian</option>
-        </select>
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="/register">Register</a></p>
+    <div class="indexLogin">
+        <form action="/login" method="post">
+            <label for="email">Email: </label>
+            <input type="email" name="email" id="email">
+            <label for="password">Password: </label>
+            <input type="password" name="password" id="password">
+            <label for="role">Role: </label>
+            <select name="role" id="role">
+                <option value="user">User</option>
+                <option value="librarian">Librarian</option>
+            </select>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/register">Register</a></p>
+    </div>
 </body>
 </html>
