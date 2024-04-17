@@ -1,9 +1,16 @@
 from application.database import db
 from flask_login import UserMixin
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Column, Integer, String, Text, DateTime, Float, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime, timedelta
 import bcrypt
+
+user_allocated_books_association = Table('user_allocated_books', db.Model.metadata,
+    Column('user_id', Integer, ForeignKey('user.id')),
+    Column('book_id', Integer, ForeignKey('book.id')),
+    Column('allocation_date', DateTime, nullable=False, default=db.func.current_timestamp()),
+    Column('return_date', DateTime, nullable=True),
+)
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -19,6 +26,8 @@ class User(db.Model, UserMixin):
 
     requests = relationship('Request', back_populates='user')
     feedbacks = relationship('Feedback', back_populates='user')
+    allocated_books = db.relationship('Book', secondary=user_allocated_books_association, back_populates='users')
+
 
     def __init__(self, name, email, phone, password, address=None, gender=None, role='user'):
         self.name = name
@@ -90,11 +99,18 @@ class Book(db.Model):
     pdf_link = db.Column(db.String(255), nullable=True)  # PDF link for the book
     price = db.Column(db.Float, nullable=True)  # Price of the e-book
 
-    section = relationship('Section', back_populates='books')
-    requests = relationship('Request', back_populates='book')
+    section = db.relationship('Section', back_populates='books')
+    requests = db.relationship('Request', back_populates='book')
+    users = db.relationship('User', secondary=user_allocated_books_association, backref='books')  # Many-to-Many relationship with User model
+    feedbacks = db.relationship('Feedback', back_populates='book')  # One-to-Many relationship with Feedback model
 
-    def __repr__(self):
-        return f'<Book {self.title}>'
+    @property
+    def rating(self):
+        feedback_ratings = [feedback.rating for feedback in self.feedbacks]
+        if feedback_ratings:
+            return sum(feedback_ratings) / len(feedback_ratings)
+        else:
+            return None
 
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -126,6 +142,7 @@ class Request(db.Model):
     request_date = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     return_date = db.Column(db.DateTime, nullable=True)
     status = db.Column(db.String(20), nullable=False, default='requested')  # Request status: requested, approved, returned
+    requested_duration = db.Column(db.Integer, nullable=False)  # Duration in days for which the book is requested
 
     user = relationship('User', back_populates='requests')
     book = relationship('Book', back_populates='requests')
@@ -134,12 +151,11 @@ class Feedback(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
-    comment = db.Column(db.Text, nullable=True)
+    rating = db.Column(db.Integer, nullable=False)  # Rating of the book (1 to 5)
     date_added = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
 
-    user = db.relationship('User', backref=db.backref('user_feedbacks', overlaps='feedbacks'))
-    book = db.relationship('Book', backref='feedbacks')
+    user = relationship('User', back_populates='feedbacks')
+    book = relationship('Book', back_populates='feedbacks')
 
     def __repr__(self):
         return f'<Feedback {self.id}>'
