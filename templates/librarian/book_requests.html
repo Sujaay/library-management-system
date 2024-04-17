@@ -32,22 +32,20 @@
             </div>
             <div class="requests-container">
                 {% for request in requests %}
-                <div class="request">
-                    <div class="request-details">
-                        <h3><a href="#" onclick="showRequestDialog(event, '{{ request.user.name }}', '{{ request.book.title }}', '{{ request.request_date }}')">{{ request.user.name }}</a></h3>
-                        <p><strong>Book:</strong> {{ request.book.title }}</p>
-                        <p><strong>Date Requested:</strong> {{ request.request_date }}</p>
+                {% if request.status == 'requested' %}
+                    <div class="request" id="request_{{ request.id }}">
+                        <div class="request-details">
+                            <h3><a href="#" onclick="showRequestDialog(event, '{{ request.user.name }}', '{{ request.book.title }}', '{{ request.request_date }}')">{{ request.user.name }}</a></h3>
+                            <p><strong>Book:</strong> {{ request.book.title }}</p>
+                            <p><strong>Date Requested:</strong> {{ request.request_date }}</p>
+                        </div>
+                        <div class="request-actions">
+                            <button onclick="acceptRequest({{ request.id }})">Accept</button>
+                            <button onclick="rejectRequest({{ request.id }})">Reject</button>
+                        </div>
                     </div>
-                    <div class="request-actions">
-                        <form action="{{ url_for('accept_request', request_id=request.id) }}" method="post">
-                            <button type="submit" name="action" value="approve">Accept</button>
-                        </form>
-                        <form action="{{ url_for('reject_request', request_id=request.id) }}" method="post">
-                            <button type="submit" name="action" value="reject">Reject</button>
-                        </form>
-                    </div>
-                </div>
-                {% endfor %}
+                {% endif %}
+            {% endfor %}
             </div>
         </section>
     </main>
@@ -85,47 +83,32 @@
             document.getElementById("request-modal").style.display = "block";
         }
 
-        function acceptRequest(event) {
-            event.preventDefault();
-            var requestId = event.target.form.dataset.requestId;
-            fetch(`/accept_request/${requestId}`, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'approve' }),
-                headers: {
-                    'Content-Type': 'application/json'
+        function acceptRequest(requestId) {
+            $.ajax({
+                type: 'POST',
+                url: '/accept_request/' + requestId,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        // Remove the request from the DOM
+                        $('#request_' + requestId).remove();
+                    } else {
+                        alert('Failed to accept request');
+                    }
                 }
-            })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    console.error('Failed to accept request');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
             });
         }
-
-        function rejectRequest(event) {
-            event.preventDefault();
-            var requestId = event.target.form.dataset.requestId;
-            fetch(`/reject_request/${requestId}`, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'reject' }),
-                headers: {
-                    'Content-Type': 'application/json'
+    
+        function rejectRequest(requestId) {
+            $.ajax({
+                type: 'POST',
+                url: '/reject_request/' + requestId,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Request rejected');
+                    } else {
+                        alert('Failed to reject request');
+                    }
                 }
-            })
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    console.error('Failed to reject request');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
             });
         }
 

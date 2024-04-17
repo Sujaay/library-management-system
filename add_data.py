@@ -9,7 +9,7 @@ import bcrypt
 fake = Faker()
 
 # Generate users
-def generate_users(num_users=10):
+def generate_users(num_users=30):
     for _ in range(num_users):
         user = User(
             name=fake.name(),
@@ -23,11 +23,11 @@ def generate_users(num_users=10):
     db.session.commit()
 
 # Generate librarians
-def generate_librarians(num_librarians=5):
+def generate_librarians(num_librarians=1):
     for _ in range(num_librarians):
         librarian = Librarian(
             name=fake.name(),
-            email=fake.email(),
+            email="admin@gmail.com",
             password=bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode('utf-8'),
         )
         db.session.add(librarian)

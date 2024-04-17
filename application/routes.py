@@ -44,9 +44,6 @@ def load_user(user_id):
 def index():
     return render_template('login.html')
 
-from flask import flash, redirect, render_template, request, url_for
-from datetime import datetime
-from .models import db, User, Librarian
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -128,7 +125,6 @@ def logout():
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
-
 
 
 # Core - General User functionalities
@@ -456,22 +452,25 @@ def book_requests():
 def view_requested_book(book_id):
     book = Book.query.get_or_404(book_id)
     return render_template('librarian/view_requested_book.html', book=book)
-
-# Route to accept a book request
 @app.route('/accept_request/<int:request_id>', methods=['POST'])
 def accept_request(request_id):
-    request = Request.query.get_or_404(request_id)
-    request.status = 'approved'
-    flash('Request approved successfully!', 'success')
-    return redirect(url_for('book_requests'))
+    request = Request.query.get(request_id)
+    if request and request.status == 'requested':
+        request.status = 'accepted'
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    else:
+        return jsonify({'status': 'error'})
 
-# Route to reject a book request
 @app.route('/reject_request/<int:request_id>', methods=['POST'])
 def reject_request(request_id):
-    request = Request.query.get_or_404(request_id)
-    request.status = 'rejected'
-    flash('Request rejected successfully!', 'success')
-    return redirect(url_for('book_requests'))
+    request = Request.query.get(request_id)
+    if request and request.status == 'requested':
+        request.status = 'rejected'
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    else:
+        return jsonify({'status': 'error'})
 
 # Route to view requested book details
 @app.route('/view_request/<int:request_id>')

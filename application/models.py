@@ -26,7 +26,7 @@ class User(db.Model, UserMixin):
 
     requests = relationship('Request', back_populates='user')
     feedbacks = relationship('Feedback', back_populates='user')
-    allocated_books = db.relationship('Book', secondary=user_allocated_books_association, back_populates='users')
+    allocated_books = relationship('Book', secondary=user_allocated_books_association, back_populates='users')
 
 
     def __init__(self, name, email, phone, password, address=None, gender=None, role='user'):
@@ -101,8 +101,8 @@ class Book(db.Model):
 
     section = db.relationship('Section', back_populates='books')
     requests = db.relationship('Request', back_populates='book')
-    users = db.relationship('User', secondary=user_allocated_books_association, backref='books')  # Many-to-Many relationship with User model
-    feedbacks = db.relationship('Feedback', back_populates='book')  # One-to-Many relationship with Feedback model
+    users = db.relationship('User', secondary=user_allocated_books_association, backref='books', overlaps="allocated_books")  # Many-to-Many relationship with User model
+    feedbacks = db.relationship('Feedback', back_populates='book')  # Relationship with Feedback model
 
     @property
     def rating(self):
@@ -111,6 +111,9 @@ class Book(db.Model):
             return sum(feedback_ratings) / len(feedback_ratings)
         else:
             return None
+
+    def __repr__(self):
+        return f'<Book {self.title}>'
 
 class Author(db.Model):
     id = db.Column(db.Integer, primary_key=True)
