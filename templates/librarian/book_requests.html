@@ -22,30 +22,158 @@
     <main>
         <section class="book-requests">
             <h2>Book Requests</h2>
+            <div class="search-sort-filter">
+                <input type="text" id="search-input" placeholder="Search...">
+                <select id="sort-filter">
+                    <option value="user-name">Sort by User Name</option>
+                    <option value="book-title">Sort by Book Title</option>
+                    <option value="request-date">Sort by Date Requested</option>
+                </select>
+            </div>
             <div class="requests-container">
                 {% for request in requests %}
-                    <div class="request">
-                        <div class="request-details">
-                            <h3><a href="{{ url_for('view_request', request_id=request.id) }}">{{ request.user.name }}</a></h3>
-                            <p><strong>Book:</strong> {{ request.book.title }}</p>
-                            <p><strong>Date Requested:</strong> {{ request.request_date }}</p>
-                        </div>
-                        <div class="request-actions">
-                            <form action="{{ url_for('accept_request', request_id=request.id) }}" method="post">
-                                <button type="submit" name="action" value="approve">Accept</button>
-                            </form>
-                            <form action="{{ url_for('reject_request', request_id=request.id) }}" method="post">
-                                <button type="submit" name="action" value="reject">Reject</button>
-                            </form>
-                        </div>
+                <div class="request">
+                    <div class="request-details">
+                        <h3><a href="#" onclick="showRequestDialog(event, '{{ request.user.name }}', '{{ request.book.title }}', '{{ request.request_date }}')">{{ request.user.name }}</a></h3>
+                        <p><strong>Book:</strong> {{ request.book.title }}</p>
+                        <p><strong>Date Requested:</strong> {{ request.request_date }}</p>
                     </div>
+                    <div class="request-actions">
+                        <form action="{{ url_for('accept_request', request_id=request.id) }}" method="post">
+                            <button type="submit" name="action" value="approve">Accept</button>
+                        </form>
+                        <form action="{{ url_for('reject_request', request_id=request.id) }}" method="post">
+                            <button type="submit" name="action" value="reject">Reject</button>
+                        </form>
+                    </div>
+                </div>
                 {% endfor %}
             </div>
         </section>
     </main>
 
-    <footer> 
+    <footer>
         <p>&copy; 2024 Library Management System</p>
     </footer>
+
+    <!-- Modal -->
+    <div id="request-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRequestDialog(event)">&times;</span>
+            <h3>User Details</h3>
+            <p><strong>User Name:</strong> <span id="user-name"></span></p>
+            <p><strong>Book Title:</strong> <span id="book-title"></span></p>
+            <p><strong>Date Requested:</strong> <span id="request-date"></span></p>
+            <div class="modal-actions">
+                <form action="" method="post">
+                    <button onclick="acceptRequest(event)">Accept</button>
+                </form>
+                <form action="" method="post">
+                    <button onclick="rejectRequest(event)">Reject</button>
+                </form>
+                <button onclick="viewRequestedBook(event)">View Book</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showRequestDialog(event, userName, bookTitle, requestDate) {
+            event.preventDefault();
+            document.getElementById("user-name").innerText = userName;
+            document.getElementById("book-title").innerText = bookTitle;
+            document.getElementById("request-date").innerText = requestDate;
+            document.getElementById("request-modal").style.display = "block";
+        }
+
+        function acceptRequest(event) {
+            event.preventDefault();
+            var requestId = event.target.form.dataset.requestId;
+            fetch(`/accept_request/${requestId}`, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'approve' }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to accept request');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function rejectRequest(event) {
+            event.preventDefault();
+            var requestId = event.target.form.dataset.requestId;
+            fetch(`/reject_request/${requestId}`, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'reject' }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    console.error('Failed to reject request');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function closeRequestDialog(event) {
+            event.preventDefault();
+            document.getElementById("request-modal").style.display = "none";
+        }
+
+        function viewRequestedBook(event) {
+            // Handle viewing requested book here
+        }
+
+        // Search function
+        document.getElementById("search-input").addEventListener("keyup", function() {
+            var filter = this.value.toLowerCase();
+            var requests = document.querySelectorAll(".request");
+            requests.forEach(function(request) {
+                var requestName = request.querySelector("h3").innerText.toLowerCase();
+                if (requestName.indexOf(filter) > -1) {
+                    request.style.display = "";
+                } else {
+                    request.style.display = "none";
+                }
+            });
+        });
+
+        // Sort function
+        document.getElementById("sort-filter").addEventListener("change", function() {
+            var sortKey = this.value;
+
+            var requestsContainer = document.querySelector(".requests-container");
+            var requests = Array.from(requestsContainer.children);
+
+            requests.sort(function(a, b) {
+                var aValue = a.querySelector("." + sortKey).innerText.toLowerCase();
+                var bValue = b.querySelector("." + sortKey).innerText.toLowerCase();
+
+                if (aValue < bValue) return -1;
+                if (aValue > bValue) return 1;
+                return 0;
+            });
+
+            requests.forEach(function(request) {
+                requestsContainer.appendChild(request);
+            });
+        });
+
+    </script>
 </body>
 </html>
+

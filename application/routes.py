@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, session, request, flash, jsonify, send_from_directory
+from flask import render_template, request, redirect, url_for, session, flash, jsonify, send_from_directory
 from application import app, db
 from application.models import *
 from flask_login import login_required, current_user, login_user, logout_user, LoginManager
@@ -6,11 +6,19 @@ from datetime import datetime, date, timedelta
 from sqlalchemy import func
 import os
 from werkzeug.utils import secure_filename
-import secrets  # For generating random filenames
+import secrets
+import uuid
 
+
+# Update the allowed file extensions
+ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
+# Define the upload folder
+UPLOAD_FOLDER = 'assets'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg', 'gif'}
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Initialize Flask-Login
@@ -302,18 +310,6 @@ def display_section_books(section_id):
     return render_template('librarian/section/display_section_books.html', section=section, books=books)
 
 
-# Existing route for rendering the add book form
-from flask import request, render_template, redirect, url_for, flash
-from werkzeug.utils import secure_filename
-import os
-import uuid
-
-# Update the allowed file extensions
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-# Define the upload folder
-UPLOAD_FOLDER = 'assets'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Function to check if file extension is allowed
 def allowed_file(filename):
@@ -368,6 +364,41 @@ def add_book(section_id):
     else:
         return render_template('librarian/book/add_book.html', section_id=section_id)
 
+# Route to edit a book
+
+@app.route('/edit_book/<int:book_id>', methods=['GET', 'POST'])
+def edit_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    if request.method == 'POST':
+        book.title = request.form['title']
+        book.author = request.form['author']
+        book.price = request.form['price']
+        book.section_id = request.form['section_id']
+
+        # Handle file uploads
+        if 'pdf_file' in request.files:
+            pdf_file = request.files['pdf_file']
+            if pdf_file.filename != '':
+                if pdf_file and allowed_file(pdf_file.filename):
+                    filename = secure_filename(pdf_file.filename)
+                    pdf_path = os.path.join(app.config['UPLOAD_FOLDER'], 'books', 'pdfs', filename)
+                    pdf_file.save(pdf_path)
+                    book.pdf_link = pdf_path
+
+        if 'image_file' in request.files:
+            image_file = request.files['image_file']
+            if image_file.filename != '':
+                if image_file and allowed_file(image_file.filename):
+                    filename = secure_filename(image_file.filename)
+                    image_path = os.path.join(app.config['UPLOAD_FOLDER'], 'books', 'images', filename)
+                    image_file.save(image_path)
+                    book.image = image_path
+
+        db.session.commit()
+        flash('Book updated successfully!', 'success')
+        return redirect(url_for('display_section_books', section_id=book.section_id))
+    return render_template('librarian/book/edit_book.html', book=book, sections=Section.query.all())
+
 
 # Route to delete a book
 @app.route('/delete_book/<int:book_id>', methods=['POST'])
@@ -380,37 +411,36 @@ def delete_book(book_id):
 
 @app.route('/librarian/book_requests')
 def book_requests():
-    # Fetch book requests from the database
     requests = Request.query.all()
     return render_template('librarian/book_requests.html', requests=requests)
 
-@app.route('/librarian/book_requests/<int:request_id>')
-def view_request(request_id):
-    # Fetch the request details from the database
-    request = Request.query.get_or_404(request_id)
-    return render_template('librarian/view_request.html', request=request)
-
-@app.route('/librarian/book_requests/<int:request_id>/accept', methods=['POST'])
-def accept_request(request_id):
-    # Fetch the request from the database
-    request = Request.query.get_or_404(request_id)
-    # Perform actions to grant access to the book (e.g., update database)
-    # Redirect back to the book requests page
-    return redirect(url_for('book_requests'))
-
-@app.route('/librarian/book_requests/<int:request_id>/reject', methods=['POST'])
-def reject_request(request_id):
-    # Fetch the request from the database
-    request = Request.query.get_or_404(request_id)
-    # Perform actions to reject the request (e.g., delete from database)
-    # Redirect back to the book requests page
-    return redirect(url_for('book_requests'))
-
 @app.route('/librarian/view_requested_book/<int:book_id>')
 def view_requested_book(book_id):
-    # Fetch the book details from the database
     book = Book.query.get_or_404(book_id)
     return render_template('librarian/view_requested_book.html', book=book)
+
+# Route to accept a book request
+@app.route('/accept_request/<int:request_id>', methods=['POST'])
+def accept_request(request_id):
+    request = Request.query.get_or_404(request_id)
+    request.status = 'approved'
+    flash('Request approved successfully!', 'success')
+    return redirect(url_for('book_requests'))
+
+# Route to reject a book request
+@app.route('/reject_request/<int:request_id>', methods=['POST'])
+def reject_request(request_id):
+    request = Request.query.get_or_404(request_id)
+    request.status = 'rejected'
+    flash('Request rejected successfully!', 'success')
+    return redirect(url_for('book_requests'))
+
+# Route to view requested book details
+@app.route('/view_request/<int:request_id>')
+def view_request(request_id):
+    request = Request.query.get_or_404(request_id)
+    return render_template('request_details.html', request=request)
+
 
 
 @app.route('/librarian/statistics')

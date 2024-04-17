@@ -78,13 +78,20 @@ button:hover {
   
   /* Modal content */
   .modal-content {
+    position: relative;
     background-color: #fefefe;
     margin: 15% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 80%;
+    width: 30%;
+    border-radius: 5px;
   }
-  
+  .modal-actions {
+    position: relative;
+    display: flex; /* Use flexbox layout */
+    gap: 10px; /* Adjust the gap between buttons */
+}
+
   /* Close button */
   .close {
     color: #aaa;

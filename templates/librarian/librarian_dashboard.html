@@ -37,7 +37,7 @@
 
         <!-- Add New Section button -->
         <button id="add-section-button" onclick="redirectToSectionAdd()">Add New Section</button>
-        <button id="request-button" onclick="redirectToRequest()">View Requests</button>
+        <button id="add-section-button" onclick="redirectToRequest()">View Requests</button>
 
         <section class="section-list">
             <h2>Sections</h2>
@@ -46,11 +46,13 @@
                     <div class="section">
                         <div class="section-header">
                             <h3>{{ section.name }}</h3>
+                            <!--
                             <div class="section-image">
                                 {% if section.image %}
                                     <img src="{{ section.image }}" alt="Section Image">
                                 {% endif %}
                             </div>
+                            -->
                         </div>
                         <div class="section-details">
                             <p>Description: {{ section.description }}</p>
