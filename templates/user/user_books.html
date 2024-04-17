@@ -1,0 +1,85 @@
+<!-- templates/user/users_books.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Books</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='user_books.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('user_dashboard') }}" class="dashboard-link">User Dashboard</a></li>
+                <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
+                <li class="navbar-right"><a href="{{ url_for('my_books') }}">My Books</a></li>
+                <li class="navbar-right"><a href="{{ url_for('view_sections') }}">Books</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div>
+        <h1>My Books</h1>
+    </div>
+    <section class="books-list">
+        <ul class="book-container">
+            {% for book in user.books %}
+            <li class="book-item">
+                <div class="book-info">
+                    <h3>{{ book.title }}</h3>
+                    <p><strong>Author:</strong> {{ book.author }}</p>
+                    {% if book.image %}
+                    <img src="{{ book.image }}" alt="Book Cover" class="book-image">
+                    {% endif %}
+                    <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+                    <p><strong>Date Added:</strong> {{ book.date_added.strftime('%Y-%m-%d') }}</p>
+                    {% if book.price %}
+                    <p><strong>Price:</strong> ${{ book.price }}</p>
+                    <a href="#" class="return-btn" data-book-id="{{ book.id }}">Return</a>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const returnButtons = document.querySelectorAll('.return-btn');
+            returnButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const bookId = this.getAttribute('data-book-id');
+                    returnBook(bookId);
+                });
+            });
+        });
+
+        function returnBook(bookId) {
+            fetch(`/return_book/${bookId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Book returned successfully!');
+                    // Optionally, reload the page or remove the book from the UI
+                } else {
+                    alert('Failed to return book. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            });
+        }
+    </script>
+</body>
+<footer>
+    <p>&copy; 2024 Library Management System</p>
+</footer>
+</html>

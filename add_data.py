@@ -44,7 +44,7 @@ def generate_authors(num_authors=50):
 
 # Generate sections
 def generate_sections():
-    section_names = ['non-fiction', 'reference', 'periodicals', "children's literature", 'special collections']
+    section_names = ['Real Story', 'Reference', 'Periodicals', "Children's Literature", 'Special Collections', 'Sci-Fi', 'History']
     for name in section_names:
         section = Section(
             name=name,
@@ -88,7 +88,8 @@ def generate_requests(num_requests=30):
                 book_id=book.id,
                 request_date=fake.date_time_between(start_date='-1y', end_date='now'),
                 return_date=fake.date_time_between(start_date='now', end_date='+1y'),
-                status=random.choice(['requested', 'approved', 'returned'])
+                status=random.choice(['requested', 'approved', 'returned']),
+                requested_duration=random.randint(1, 14)  # Random duration in days
             )
             db.session.add(request)
     db.session.commit()
@@ -105,7 +106,6 @@ def generate_feedbacks(num_feedbacks=200):
                 user_id=user.id,
                 book_id=book.id,
                 rating=random.randint(1, 5),
-                comment=fake.paragraph(),
                 date_added=fake.date_time_between(start_date='-1y', end_date='now')
             )
             db.session.add(feedback)

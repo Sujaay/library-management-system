@@ -1,5 +1,3 @@
-<!-- templates/user/view_books.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,18 +7,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='user/view_books.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
-
 </head>
 <body>
     <header>
-        <h1>Books in {{ section.name }}</h1>
         <nav>
             <ul>
-                <li><a href="{{ url_for('view_sections') }}">Back to Sections</a></li>
-                <!-- Add other navigation links here if needed -->
+                <li><a href="{{ url_for('user_dashboard') }}" class="dashboard-link">User Dashboard</a></li>
+                <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
+                <li class="navbar-right"><a href="{{ url_for('my_books') }}">My Books</a></li>
+                <li class="navbar-right"><a href="{{ url_for('view_sections') }}">Books</a></li>
             </ul>
         </nav>
     </header>
+    <div>
+        <h1>Books in {{ section.name }}</h1>
+    </div>
     <section class="books-list">
         <div class="search-filter">
             <input type="text" id="search-input" placeholder="Search...">
@@ -32,7 +34,6 @@
                 <option value="date">Date Added</option>
             </select>
         </div>        
-        <h2>Books</h2>
         <ul class="book-container">
             {% for book in books %}
             <li class="book-item">
@@ -46,15 +47,56 @@
                     <p><strong>Date Added:</strong> {{ book.date_added.strftime('%Y-%m-%d') }}</p>
                     {% if book.price %}
                     <p><strong>Price:</strong> ${{ book.price }}</p>
-                    <a href="{{ url_for('download_ebook', book_id=book.id) }}">Download</a>
+                    <a href="#" class="request-btn" onclick="showDurationModal('{{ current_user.username }}', '{{ book.id }}', '{{ book.date_added.strftime('%Y-%m-%d') }}')">Request</a>
                     {% endif %}
                 </div>
             </li>
             {% endfor %}
         </ul>
     </section>
-
     <script>
+        function showDurationModal(userName, bookId, requestDate) {
+            document.getElementById("userName").innerText = userName;
+            document.getElementById("requestId").innerText = bookId;
+            document.getElementById("requestDate").innerText = requestDate;
+            document.getElementById("duration").value = ""; // Clear any previous duration input
+            document.getElementById("durationModal").style.display = "block";
+        }
+        
+        // Add this function to close the modal dialog
+        function closeDurationModal() {
+            document.getElementById("durationModal").style.display = "none";
+        }
+        
+        // Modify the sendBookRequest function to send request with duration
+        function sendRequestWithDuration() {
+            const bookId = document.getElementById("requestId").innerText;
+            const duration = document.getElementById("duration").value;
+            if (!duration || duration <= 0) {
+                alert("Please enter a valid duration.");
+                return;
+            }
+            
+            fetch(`/request_book/${bookId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ duration: duration })
+            })
+            .then(response => {
+                if (response.ok) {
+                    closeDurationModal(); // Close the modal after successful request
+                } else {
+                    alert('Failed to send request. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            });
+        }
+    
         const searchInput = document.getElementById('search-input');
         const filterSelect = document.getElementById('filter-select');
         const bookItems = document.querySelectorAll('.book-item');
@@ -108,7 +150,54 @@
                 booksList.appendChild(item);
             });
         }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            const requestButtons = document.querySelectorAll('.request-btn');
+            requestButtons.forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const bookId = this.getAttribute('data-book-id');
+                    sendBookRequest(bookId);
+                });
+            });
+        });
+    
+        function sendBookRequest(bookId) {
+            fetch(`/request_book/${bookId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Request sent successfully!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again later.');
+            });
+        }
     </script>
     
+
+    <!-- Modal Dialog Box -->
+    <div id="durationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeDurationModal()">&times;</span>
+            <h3>Request Book</h3>
+            <p>User Name: <span id="userName"></span></p>
+            <p>Request ID: <span id="requestId"></span></p>
+            <p>Date of Request: <span id="requestDate"></span></p>
+            <label for="duration">Duration (in days):</label>
+            <input type="number" id="duration" name="duration" min="1" required>
+            <button onclick="sendRequestWithDuration()">Send Request</button>
+        </div>
+    </div>
 </body>
+<footer>
+    <p>&copy; 2023 Library Management System. All rights reserved.</p>
+</footer>
 </html>

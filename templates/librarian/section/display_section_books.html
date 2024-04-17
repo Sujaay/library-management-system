@@ -48,9 +48,9 @@
                         <p><strong>Date Added:</strong> {{ book.date_added }}</p>
                         <p><strong>Price: </strong>Rs. {{ book.price }}</p>
                     </div>
-                    <div class="book-image">
-                        <img src="{{ url_for('static', filename=book.image) }}" alt="{{ book.title }}">
-                    </div>
+                    {% if book.image %}
+                    <img src="{{ book.image }}" alt="Book Cover" class="book-image">
+                    {% endif %}
                     <div class="book-buttons">
                         <button onclick="editBook({{ book.id }})">Edit</button>
                         <button onclick="deleteBook({{ book.id }})">Delete</button>
@@ -61,6 +61,7 @@
     </div>
 
     <script>
+        
         $(document).ready(function() {
             // Function to handle search button click
             $('#search-button').click(function() {

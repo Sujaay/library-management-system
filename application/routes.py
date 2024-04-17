@@ -44,6 +44,10 @@ def load_user(user_id):
 def index():
     return render_template('login.html')
 
+from flask import flash, redirect, render_template, request, url_for
+from datetime import datetime
+from .models import db, User, Librarian
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'GET':
@@ -56,6 +60,13 @@ def register():
         address = request.form['address']
         gender = request.form.get('gender')
         role = request.form.get('role')
+
+        # Check if the email already exists in the database
+        existing_user = User.query.filter_by(email=email).first()
+        print("Existing user:", existing_user)  # Debugging statement
+        if existing_user:
+            flash('This email is already registered. Please use a different email.', 'danger')
+            return redirect(url_for('register'))
 
         if role == 'user':
             # Create a new user instance and add it to the database
@@ -122,13 +133,28 @@ def logout():
 
 # Core - General User functionalities
 
+@app.route('/request_book/<int:book_id>', methods=['POST'])
+@login_required
+def request_book(book_id):
+    user_id = current_user.id  # Assuming you have a current user object
+
+    # Create a new request entry in the database
+    new_request = Request(user_id=user_id, book_id=book_id)
+    db.session.add(new_request)
+    db.session.commit()
+
+    # Notify the admin about the request (You need to implement notification logic)
+    return jsonify({'message': 'Request sent successfully'}), 200
+
 # User dashboard route
 @app.route('/user_dashboard')
+@login_required
 def user_dashboard():
     return render_template('user/user_dashboard.html')
 
 # View sections and books route
 @app.route('/view_sections')
+@login_required
 def view_sections():
     # Fetch all sections from the database
     sections = Section.query.all()
@@ -136,7 +162,18 @@ def view_sections():
     # Render the view_sections template with the sections data
     return render_template('user/view_sections.html', sections=sections)
 
+@app.route('/my_books')
+@login_required
+def my_books():
+    # Get the current user (assuming user authentication is implemented)
+    user = current_user  # Assign current_user to a local variable
+    # Get the books borrowed or requested by the current user
+    user_books = user.books  # Assuming there's a relationship between User and Book models
+    
+    return render_template('user_books.html', user=user, books=user_books)
+
 @app.route('/view_books/<int:section_id>')
+@login_required
 def view_books(section_id):
     # Fetch the section based on the provided section_id
     section = Section.query.get(section_id)
@@ -152,6 +189,7 @@ def view_books(section_id):
     return render_template('user/view_books.html', section=section, books=books)
 # Request and return books route
 @app.route('/request_return_books')
+@login_required
 def request_return_books():
     # Logic to fetch available and borrowed books
     available_books = Book.query.filter_by(borrowed=False).all()
@@ -160,6 +198,7 @@ def request_return_books():
 
 # Give feedback route
 @app.route('/give_feedback')
+@login_required
 def give_feedback():
     # Logic to fetch a book for feedback
     book = Book.query.first()  # Example: Fetch the first book for feedback
@@ -183,7 +222,6 @@ def user_has_access_to_download_book():
     return True  # Example: Always return True for demonstration purposes
 
 # Add more routes and logic as needed
-
 
 # LIBRARIAN ROUTES
 

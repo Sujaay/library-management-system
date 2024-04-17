@@ -1,3 +1,14 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    margin-top: 20px;
+    text-align: center;
+}
+
 .add-book-form {
     max-width: 500px;
     margin: 0 auto;

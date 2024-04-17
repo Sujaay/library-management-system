@@ -4,21 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='user/user_dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
 </head>
 <body>
     <header>
-        <h1>User Dashboard</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('user_dashboard') }}" class="dashboard-link">User Dashboard</a></li>
+                <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
+                <li class="navbar-right"><a href="{{ url_for('my_books') }}">My Books</a></li>
+                <li class="navbar-right"><a href="{{ url_for('view_sections') }}">Books</a></li>
+            </ul>
+        </nav>
     </header>
-    <nav>
-        <ul>
-            <li><a href="{{ url_for('view_sections') }}">View Sections and Books</a></li>
-            <li><a href="{{ url_for('request_return_books') }}">Request and Return Books</a></li>
-            <li><a href="{{ url_for('give_feedback') }}">Give Feedback</a></li>
-            <li><a href="{{ url_for('download_ebook', book_id=1) }}">Download E-book</a></li>
-            <!-- Add more links as needed -->
-        </ul>
-    </nav>
+
+    <main>
+
+        <div class="user-info">
+            <p>Hello {{current_user.name}}! How are you?</p>
+            <p><a href="#" onclick="editProfile()">Change my information</a></p>
+        </div>
+
+
+    </main>
 </body>
+    <footer>
+        <p>&copy; 2024 Library Management System</p>
+    </footer>
 </html>
