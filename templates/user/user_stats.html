@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Statistics</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='user/user_stats.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('user_dashboard') }}" class="dashboard-link">User Dashboard</a></li>
+                <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
+                <li class="navbar-right"><a href="{{ url_for('my_books') }}">My Books</a></li>
+                <li class="navbar-right"><a href="{{ url_for('view_sections') }}">Books</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+
+        <section class="stats-container">
+            <h1>User Statistics</h1>
+            <div class="stat">
+                <h2>Total Books Read</h2>
+                <p>{{ total_books_read }}</p>
+            </div>
+            <div class="stat">
+                <h2>Favorite Genre</h2>
+                <p>{{ favorite_genre }}</p>
+            </div>
+            <div class="stat">
+                <h2>Average Rating</h2>
+                <p>{{ average_rating }}</p>
+            </div>
+            <div class="stat">
+                <h2>Books Borrowed</h2>
+                <p>{{ books_borrowed }}</p>
+            </div>
+            <div class="stat">
+                <h2>Books Returned</h2>
+                <p>{{ books_returned }}</p>
+            </div>
+            <div class="stat">
+                <h2>Most Borrowed Author</h2>
+                <p>{{ most_borrowed_author }}</p>
+            </div>
+            <!-- Add more stats as needed -->
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Library Management System</p>
+    </footer>
+</body>
+</html>

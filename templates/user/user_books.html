@@ -1,12 +1,13 @@
-<!-- templates/user/users_books.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Books</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='user_books.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='librarian_nav.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='user/user_books.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='footer.css') }}">
+        
 </head>
 <body>
     <header>
@@ -14,7 +15,7 @@
             <ul>
                 <li><a href="{{ url_for('user_dashboard') }}" class="dashboard-link">User Dashboard</a></li>
                 <li class="navbar-right"><a href="{{ url_for('logout') }}">Logout</a></li>
-                <li class="navbar-right"><a href="{{ url_for('librarian_statistics') }}">Stats</a></li>
+                <li class="navbar-right"><a href="{{ url_for('user_stats') }}">Stats</a></li>
                 <li class="navbar-right"><a href="{{ url_for('my_books') }}">My Books</a></li>
                 <li class="navbar-right"><a href="{{ url_for('view_sections') }}">Books</a></li>
             </ul>
@@ -43,6 +44,34 @@
             </li>
             {% endfor %}
         </ul>
+
+        <!-- Display Accepted Books -->
+        <section class="accepted-books">
+            <h2>Accepted Books</h2>
+            <div class="books-container">
+                {% for book in accepted_books %}
+                <div class="book">
+                    <h3>{{ book.title }}</h3>
+                    <p><strong>Author:</strong> {{ book.author }}</p>
+                    <!-- Add more book details as needed -->
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Display Rejected Books -->
+        <section class="rejected-books">
+            <h2>Rejected Books</h2>
+            <div class="books-container">
+                {% for book in rejected_books %}
+                <div class="book">
+                    <h3>{{ book.title }}</h3>
+                    <p><strong>Author:</strong> {{ book.author }}</p>
+                    <!-- Add more book details as needed -->
+                </div>
+                {% endfor %}
+            </div>
+        </section>
     </section>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -134,12 +134,15 @@ def logout():
 def request_book(book_id):
     user_id = current_user.id  # Assuming you have a current user object
 
+    # Define the requested duration for the book
+    requested_duration = 7  # 7 days by default, you can change this according to your requirements
+
     # Create a new request entry in the database
-    new_request = Request(user_id=user_id, book_id=book_id)
+    new_request = Request(user_id=user_id, book_id=book_id, requested_duration=requested_duration)
     db.session.add(new_request)
     db.session.commit()
 
-    # Notify the admin about the request (You need to implement notification logic)
+    # Notify the user about the request (You need to implement notification logic)
     return jsonify({'message': 'Request sent successfully'}), 200
 
 # User dashboard route
@@ -158,15 +161,35 @@ def view_sections():
     # Render the view_sections template with the sections data
     return render_template('user/view_sections.html', sections=sections)
 
+@app.route('/user_stats')
+def user_stats():
+    # Dummy data for demonstration
+    total_books_read = 50
+    favorite_genre = "Mystery"
+    average_rating = 4.5
+    books_borrowed = 10
+    books_returned = 8
+    most_borrowed_author = "Agatha Christie"
+
+    return render_template('user/user_stats.html', 
+                           total_books_read=total_books_read, 
+                           favorite_genre=favorite_genre, 
+                           average_rating=average_rating, 
+                           books_borrowed=books_borrowed, 
+                           books_returned=books_returned, 
+                           most_borrowed_author=most_borrowed_author)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
 @app.route('/my_books')
 @login_required
 def my_books():
-    # Get the current user (assuming user authentication is implemented)
-    user = current_user  # Assign current_user to a local variable
-    # Get the books borrowed or requested by the current user
-    user_books = user.books  # Assuming there's a relationship between User and Book models
-    
-    return render_template('user_books.html', user=user, books=user_books)
+    user = current_user
+    allocated_books = user.books
+    accepted_books = Book.query.join(Request).filter(Request.status == 'approved', Request.user_id == user.id).all()
+    rejected_books = Book.query.join(Request).filter(Request.status == 'rejected', Request.user_id == user.id).all()
+    return render_template('user/user_books.html', user=user, allocated_books=allocated_books, accepted_books=accepted_books, rejected_books=rejected_books)
 
 @app.route('/view_books/<int:section_id>')
 @login_required
@@ -257,7 +280,7 @@ def add_section():
                 # Update section_image with saved filename
                 section_image = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-        section = Section(name=section_name, description=section_description,  image=section_image)
+        section = Section(name=section_name, description=section_description)
         db.session.add(section)
         db.session.commit()
         flash('Section added successfully!', 'success')

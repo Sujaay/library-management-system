@@ -15,7 +15,7 @@ def generate_users(num_users=30):
             name=fake.name(),
             email=fake.email(),
             phone=fake.phone_number(),
-            password=bcrypt.hashpw(b'user', bcrypt.gensalt()).decode('utf-8'),
+            password='user',
             address=fake.address(),
             gender=random.choice(['Male', 'Female', 'Other']),
         )
@@ -28,7 +28,7 @@ def generate_librarians(num_librarians=1):
         librarian = Librarian(
             name=fake.name(),
             email="admin@gmail.com",
-            password=bcrypt.hashpw(b'admin', bcrypt.gensalt()).decode('utf-8'),
+            password='admin'
         )
         db.session.add(librarian)
     db.session.commit()
@@ -56,7 +56,7 @@ def generate_sections():
     db.session.commit()
 
 # Generate books
-def generate_books(num_books=100):
+def generate_books(num_books=200):
     sections = Section.query.all()
     authors = Author.query.all()
     for _ in range(num_books):
@@ -76,7 +76,7 @@ def generate_books(num_books=100):
     db.session.commit()
 
 # Generate requests
-def generate_requests(num_requests=30):
+def generate_requests(num_requests=50):
     users = User.query.all()
     books = Book.query.all()
     for _ in range(num_requests):
@@ -88,7 +88,7 @@ def generate_requests(num_requests=30):
                 book_id=book.id,
                 request_date=fake.date_time_between(start_date='-1y', end_date='now'),
                 return_date=fake.date_time_between(start_date='now', end_date='+1y'),
-                status=random.choice(['requested', 'approved', 'returned']),
+                status=random.choice(['requested', 'approved']),
                 requested_duration=random.randint(1, 14)  # Random duration in days
             )
             db.session.add(request)
